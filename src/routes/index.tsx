@@ -4,8 +4,10 @@ import adminRoutes from "./adminRoutes";
 import authRoutes from "./authRoutes";
 import teacherRoutes from "./teacherRoutes";
 import studentRoutes from "./studentRoutes";
+import commonRoutes from "./commonRoutes";
 
 const router = [
+  ...commonRoutes,
   ...adminRoutes,
   ...authRoutes,
   ...teacherRoutes,

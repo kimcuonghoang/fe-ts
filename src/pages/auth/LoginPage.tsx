@@ -1,9 +1,97 @@
-import React from "react";
+import React, { useState } from "react";
+import { Button, Form, Input, Typography, message } from "antd";
+import { LockOutlined, MailOutlined } from "@ant-design/icons";
+import { Link, useNavigate } from "react-router-dom";
+import { authLogin } from "../../common/api/authApi";
+import { useMutation } from "@tanstack/react-query";
 
-type Props = {};
+const { Title } = Typography;
 
-const LoginPage = (props: Props) => {
-  return <div>LoginPage</div>;
+const LoginPage = () => {
+  const nav = useNavigate();
+  const { mutate, isPending } = useMutation({
+    mutationKey: ["login"],
+    mutationFn: async (values: any) => authLogin(values),
+  });
+  const onFinish = async (values: any) => {
+    mutate(values, {
+      onSuccess: (res) => {
+        console.log("Login success:", res);
+        message.success("Đăng nhập thành công!");
+        nav("/");
+      },
+      onError: (err) => {
+        console.error("Login error:", err);
+        message.error("Đăng nhập thất bại, vui lòng thử lại.");
+      },
+    });
+  };
+
+  return (
+    <div className="bg-white shadow-md rounded-lg p-8">
+      <Title level={3} className="text-center text-blue-600 mb-6">
+        Đăng nhập tài khoản
+      </Title>
+
+      <Form layout="vertical" onFinish={onFinish}>
+        <Form.Item
+          name="email"
+          label="Email"
+          rules={[
+            { required: true, message: "Vui lòng nhập email!" },
+            { type: "email", message: "Email không hợp lệ!" },
+          ]}
+        >
+          <Input
+            prefix={<MailOutlined className="text-blue-500" />}
+            placeholder="example@email.com"
+            size="large"
+          />
+        </Form.Item>
+
+        <Form.Item
+          name="password"
+          label="Mật khẩu"
+          rules={[{ required: true, message: "Vui lòng nhập mật khẩu!" }]}
+        >
+          <Input.Password
+            prefix={<LockOutlined className="text-blue-500" />}
+            placeholder="••••••••"
+            size="large"
+          />
+        </Form.Item>
+
+        <div className="flex justify-end mb-4">
+          <Link
+            to="/forgot-password"
+            className="text-sm text-blue-500 hover:underline"
+          >
+            Quên mật khẩu?
+          </Link>
+        </div>
+
+        <Form.Item>
+          <Button
+            type="primary"
+            htmlType="submit"
+            block
+            loading={isPending}
+            size="large"
+            className="bg-blue-600 hover:bg-blue-700"
+          >
+            Đăng nhập
+          </Button>
+        </Form.Item>
+      </Form>
+
+      <div className="text-center text-sm mt-4">
+        Chưa có tài khoản?{" "}
+        <Link to="/register" className="text-blue-500 hover:underline">
+          Đăng ký ngay
+        </Link>
+      </div>
+    </div>
+  );
 };
 
 export default LoginPage;
