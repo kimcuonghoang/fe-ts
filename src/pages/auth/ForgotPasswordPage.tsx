@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Form, Input, Button, Typography, message } from "antd";
 import { MailOutlined } from "@ant-design/icons";
 import { Link } from "react-router-dom";
+import { authForgotPassword } from "../../common/api/authApi";
 
 const { Title, Paragraph } = Typography;
 
@@ -11,7 +12,7 @@ const ForgotPasswordPage = () => {
   const onFinish = async (values: any) => {
     setLoading(true);
     try {
-      // Gọi API gửi email reset password tại đây
+      await authForgotPassword(values.email);
       console.log("Forgot password email:", values.email);
       await new Promise((res) => setTimeout(res, 1000));
       message.success("Email khôi phục mật khẩu đã được gửi!");
