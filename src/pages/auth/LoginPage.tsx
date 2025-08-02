@@ -4,6 +4,10 @@ import { LockOutlined, MailOutlined } from "@ant-design/icons";
 import { Link, useNavigate } from "react-router-dom";
 import { authLogin } from "../../common/api/authApi";
 import { useMutation } from "@tanstack/react-query";
+import {
+  setAccessToken,
+  setRefreshToken,
+} from "../../common/utils/localStrorage";
 
 const { Title } = Typography;
 
@@ -16,6 +20,10 @@ const LoginPage = () => {
   const onFinish = async (values: any) => {
     mutate(values, {
       onSuccess: (res) => {
+        const { user, accessToken, refreshToken } = res.data.data;
+        localStorage.setItem("user", JSON.stringify(user));
+        setAccessToken(accessToken);
+        setRefreshToken(refreshToken);
         console.log("Login success:", res);
         message.success("Đăng nhập thành công!");
         nav("/");

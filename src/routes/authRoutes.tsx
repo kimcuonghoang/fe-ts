@@ -4,6 +4,7 @@ import LoginPage from "../pages/auth/LoginPage";
 import RegisterPage from "../pages/auth/RegisterPage";
 import ForgotPasswordPage from "../pages/auth/ForgotPasswordPage";
 import AuthLayout from "../components/layouts/AuthLayout";
+import ResetPasswordPage from "../pages/auth/ResetPasswordPage";
 
 const authRoutes: RouteObject[] = [
   {
@@ -21,6 +22,7 @@ const authRoutes: RouteObject[] = [
         path: "/forgot-password",
         element: <ForgotPasswordPage />,
       },
+      { path: "/reset-password/:resetToken", element: <ResetPasswordPage /> },
     ],
   },
 ];
