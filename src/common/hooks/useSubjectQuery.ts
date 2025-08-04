@@ -9,7 +9,7 @@ import {
 } from "../api/subjectApi";
 import { message } from "antd";
 
-export const useSubjectsQuery = () => {
+export const useSubjectQuery = () => {
   return useQuery<Subject[]>({
     queryKey: ["subject"],
     queryFn: getSubject,

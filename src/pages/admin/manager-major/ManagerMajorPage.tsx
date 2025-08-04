@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   useMajorsQuery,
   useCreateMajor,
@@ -6,11 +6,7 @@ import {
   useDeleteMajor,
   useRestoreMajor,
 } from "../../../common/hooks/useMajorQuery";
-import {
-  DeleteOutlined,
-  EditOutlined,
-  RotateLeftOutlined,
-} from "@ant-design/icons";
+import { DeleteOutlined, RotateLeftOutlined } from "@ant-design/icons";
 import { Controller, useForm } from "react-hook-form";
 import { Major } from "../../../common/api/majorApi";
 import {
@@ -32,16 +28,10 @@ const ManagerMajorPage = () => {
   const restoreMutation = useRestoreMajor();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingMajor, setEditingMajor] = useState<Major | null>(null);
-  const { handleSubmit, reset, formState, getValues, control } =
-    useForm<Omit<Major, "_id">>();
-  console.log(formState.errors);
-
+  const { handleSubmit, reset, control } = useForm<Omit<Major, "_id">>();
   const openModal = (major?: Major) => {
-    console.log("Open modal with major:", major);
     if (major) {
-      console.log(major);
       setEditingMajor(major);
-      console.log("Setting values for editing:", getValues());
       reset({
         code: major.code,
         name: major.name,
@@ -68,28 +58,13 @@ const ManagerMajorPage = () => {
     try {
       if (editingMajor) {
         await updateMutation.mutateAsync({ id: editingMajor._id, data });
-        message.success("Cập nhật thành công!");
       } else {
         await createMutation.mutateAsync(data);
-        message.success("Thêm mới thành công!");
       }
       closeModal();
     } catch {
       message.error("Đã có lỗi xảy ra.");
     }
-  };
-
-  const onDelete = async (id: string) => {
-    Modal.confirm({
-      title: "Bạn có chắc chắn muốn xoá?",
-      okText: "Xoá",
-      cancelText: "Huỷ",
-      okType: "danger",
-      onOk: async () => {
-        await deleteMutation.mutateAsync(id);
-        message.success("Xoá thành công!");
-      },
-    });
   };
 
   const columns = [
