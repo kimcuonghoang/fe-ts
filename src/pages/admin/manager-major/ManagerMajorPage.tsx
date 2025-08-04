@@ -1,25 +1,24 @@
-import React, { useState } from "react";
-import {
-  useMajorsQuery,
-  useCreateMajor,
-  useUpdateMajor,
-  useDeleteMajor,
-  useRestoreMajor,
-} from "../../../common/hooks/useMajorQuery";
 import { DeleteOutlined, RotateLeftOutlined } from "@ant-design/icons";
-import { Controller, useForm } from "react-hook-form";
-import { Major } from "../../../common/api/majorApi";
 import {
-  Table,
   Button,
   Form,
   Input,
-  Modal,
   message,
-  Tag,
+  Modal,
   Popconfirm,
+  Table,
+  Tag,
 } from "antd";
-
+import { useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { Major } from "../../../common/api/majorApi";
+import {
+  useCreateMajor,
+  useDeleteMajor,
+  useMajorsQuery,
+  useRestoreMajor,
+  useUpdateMajor,
+} from "../../../common/hooks/useMajorQuery";
 const ManagerMajorPage = () => {
   const { data: majors, isLoading } = useMajorsQuery();
   const createMutation = useCreateMajor();

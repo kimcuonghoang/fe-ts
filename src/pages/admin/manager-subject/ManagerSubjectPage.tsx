@@ -1,25 +1,24 @@
-import React, { useState } from "react";
-import {
-  useSubjectQuery,
-  useCreateSubject,
-  useUpdateSubject,
-  useDeleteSubject,
-  useRestoreSubject,
-} from "../../../common/hooks/useSubjectQuery";
 import { DeleteOutlined, RotateLeftOutlined } from "@ant-design/icons";
-import { Controller, useForm } from "react-hook-form";
-import { Major } from "../../../common/api/majorApi";
 import {
-  Table,
   Button,
   Form,
   Input,
-  Modal,
   message,
-  Tag,
+  Modal,
   Popconfirm,
+  Table,
+  Tag,
 } from "antd";
+import { useState } from "react";
+import { Controller, useForm } from "react-hook-form";
 import { Subject } from "../../../common/api/subjectApi";
+import {
+  useCreateSubject,
+  useDeleteSubject,
+  useRestoreSubject,
+  useSubjectQuery,
+  useUpdateSubject,
+} from "../../../common/hooks/useSubjectQuery";
 
 const ManagerSubjectPage = () => {
   const { data: subject, isLoading } = useSubjectQuery();

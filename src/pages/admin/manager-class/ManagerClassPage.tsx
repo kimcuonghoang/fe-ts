@@ -1,9 +1,164 @@
-import React from "react";
+import { DeleteOutlined, RotateLeftOutlined } from "@ant-design/icons";
+import { Button, message, Popconfirm, Table, Tag } from "antd";
+import { useState } from "react";
+import { Class } from "../../../common/api/classApi";
+import {
+  useCreateClass,
+  useDeleteClass,
+  useRestoreClass,
+  useClassQuery,
+  useUpdateClass,
+} from "../../../common/hooks/useClassQuery";
+import ClassModalForm from "../../../components/ClassModalForm";
+import dayjs from "dayjs";
 
-type Props = {};
+const ManagerClassPage = () => {
+  const { data: classes, isLoading } = useClassQuery();
+  const createMutation = useCreateClass();
+  const updateMutation = useUpdateClass();
+  const deleteMutation = useDeleteClass();
+  const restoreMutation = useRestoreClass();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingClass, setEditingClass] = useState<Class | null>(null);
 
-const ManagerClassPage = (props: Props) => {
-  return <div>ManagerClassPage</div>;
+  const openModal = (cls?: Class) => {
+    setEditingClass(cls ?? null);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setEditingClass(null);
+    setIsModalOpen(false);
+  };
+
+  const handleSubmit = async (data: Omit<Class, "_id">) => {
+    try {
+      if (editingClass) {
+        await updateMutation.mutateAsync({ id: editingClass._id, data });
+      } else {
+        await createMutation.mutateAsync(data);
+      }
+      closeModal();
+    } catch {
+      message.error("Đã có lỗi xảy ra.");
+    }
+  };
+
+  const columns = [
+    {
+      title: "Môn học",
+      dataIndex: "subjectId",
+      key: "subjectId",
+      render: (item: any) => <p>{item?.name ?? "Chưa có môn học"}</p>,
+    },
+    {
+      title: "Chuyên ngành",
+      dataIndex: "majorId",
+      key: "majorId",
+      render: (item: any) => <p>{item?.name ?? "Chưa có chuyên ngành"}</p>,
+    },
+    {
+      title: "Tên lớp",
+      dataIndex: "name",
+      key: "name",
+    },
+    {
+      title: "Giáo viên",
+      dataIndex: "teacherId",
+      key: "teacherId",
+      render: (item: any) => <p>{item?.fullname ?? "Chưa có giáo viên"}</p>,
+    },
+    {
+      title: "Sĩ số",
+      dataIndex: "studentIds",
+      key: "studentIds",
+      render: (ids: any[]) => <p>{ids?.length ?? 0}</p>,
+    },
+    {
+      title: "Ngày bắt đầu",
+      dataIndex: "startDate",
+      key: "startDate",
+      render: (item: string) => (
+        <p>{dayjs(item).locale("vi-VN").format("DD-MM-YYYY")}</p>
+      ),
+    },
+    {
+      title: "Số buổi",
+      dataIndex: "totalSessions",
+      key: "totalSessions",
+    },
+    {
+      title: "Ca học",
+      dataIndex: "shift",
+      key: "shift",
+    },
+    {
+      title: "Trạng thái",
+      dataIndex: "deletedAt",
+      key: "deletedAt",
+      render: (deletedAt: string | null) =>
+        deletedAt ? (
+          <Tag color="red">Đã xóa</Tag>
+        ) : (
+          <Tag color="green">Hoạt động</Tag>
+        ),
+    },
+    {
+      title: "Thao tác",
+      key: "actions",
+      render: (_: any, record: Class) => (
+        <div className="space-x-2">
+          <Button type="link" onClick={() => openModal(record)}>
+            Sửa
+          </Button>
+          {!record.deletedAt ? (
+            <Popconfirm
+              title="Bạn chắc chắn muốn xóa?"
+              onConfirm={() => deleteMutation.mutate(record._id)}
+            >
+              <Button type="link" danger icon={<DeleteOutlined />}>
+                Xoá
+              </Button>
+            </Popconfirm>
+          ) : (
+            <Button
+              type="link"
+              onClick={() => restoreMutation.mutate(record._id)}
+              icon={<RotateLeftOutlined />}
+            >
+              Khôi phục
+            </Button>
+          )}
+        </div>
+      ),
+    },
+  ];
+
+  return (
+    <div className="p-6 max-w-6xl mx-auto">
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold">Quản lý lớp học</h1>
+        <Button type="primary" onClick={() => openModal()}>
+          Thêm lớp
+        </Button>
+      </div>
+
+      <Table
+        dataSource={classes}
+        columns={columns}
+        rowKey="_id"
+        loading={isLoading}
+        pagination={{ pageSize: 5 }}
+      />
+
+      <ClassModalForm
+        open={isModalOpen}
+        onClose={closeModal}
+        onSubmit={handleSubmit}
+        initialData={editingClass}
+      />
+    </div>
+  );
 };
 
 export default ManagerClassPage;
