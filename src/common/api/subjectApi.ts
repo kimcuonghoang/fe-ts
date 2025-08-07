@@ -32,3 +32,7 @@ export const restoreSubject = async (id: string) => {
   const res = await api.patch(`/subjects/restore/${id}`);
   return res.data;
 };
+export const softDeleteSubject = async (id: string) => {
+  const res = await api.patch(`/subjects/soft-delete/${id}`);
+  return res.data;
+};

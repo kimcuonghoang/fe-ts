@@ -56,7 +56,7 @@ const ClassModalForm = ({ open, onClose, onSubmit, initialData }: Props) => {
     onSubmit(formattedData);
   };
   const shift = [
-    { label: "Ca 1", value: "1" },
+    { label: "Ca 1 ( 7h00 - 9h00 )", value: "1" },
     { label: "Ca 2", value: "2" },
     { label: "Ca 3", value: "3" },
     { label: "Ca 4", value: "4" },

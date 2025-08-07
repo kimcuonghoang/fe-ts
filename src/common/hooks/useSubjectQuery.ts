@@ -6,6 +6,7 @@ import {
   deleteSubject,
   Subject,
   restoreSubject,
+  softDeleteSubject,
 } from "../api/subjectApi";
 import { message } from "antd";
 
@@ -57,6 +58,13 @@ export const useDeleteSubject = () => {
     onError: () => {
       message.error("Xóa thất bại");
     },
+  });
+};
+export const useSoftDeleteSubject = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: softDeleteSubject,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["subject"] }),
   });
 };
 

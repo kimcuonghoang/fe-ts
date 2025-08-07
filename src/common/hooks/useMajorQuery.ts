@@ -6,6 +6,7 @@ import {
   deleteMajor,
   Major,
   restoreMajor,
+  softDeleteMajor,
 } from "../api/majorApi";
 import { message } from "antd";
 
@@ -59,7 +60,13 @@ export const useDeleteMajor = () => {
     },
   });
 };
-
+export const useSoftDeleteMajor = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: softDeleteMajor,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["majors"] }),
+  });
+};
 export const useRestoreMajor = () => {
   const queryClient = useQueryClient();
   return useMutation({

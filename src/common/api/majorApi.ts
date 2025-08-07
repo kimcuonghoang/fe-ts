@@ -7,6 +7,8 @@ export type Major = {
   description: string;
   isDeleted?: boolean;
   deletedAt?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
 };
 
 export const getMajors = async (): Promise<Major[]> => {
@@ -28,6 +30,12 @@ export const deleteMajor = async (id: string) => {
   const res = await api.delete(`/majors/${id}`);
   return res.data;
 };
+
+export const softDeleteMajor = async (id: string) => {
+  const res = await api.patch(`/majors/soft-delete/${id}`);
+  return res.data;
+};
+
 export const restoreMajor = async (id: string) => {
   const res = await api.patch(`/majors/restore/${id}`);
   return res.data;

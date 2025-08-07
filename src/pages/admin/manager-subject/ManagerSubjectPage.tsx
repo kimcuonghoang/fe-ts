@@ -1,4 +1,8 @@
-import { DeleteOutlined, RotateLeftOutlined } from "@ant-design/icons";
+import {
+  DeleteOutlined,
+  EditOutlined,
+  RotateLeftOutlined,
+} from "@ant-design/icons";
 import {
   Button,
   Form,
@@ -14,8 +18,8 @@ import { Controller, useForm } from "react-hook-form";
 import { Subject } from "../../../common/api/subjectApi";
 import {
   useCreateSubject,
-  useDeleteSubject,
   useRestoreSubject,
+  useSoftDeleteSubject,
   useSubjectQuery,
   useUpdateSubject,
 } from "../../../common/hooks/useSubjectQuery";
@@ -24,7 +28,7 @@ const ManagerSubjectPage = () => {
   const { data: subject, isLoading } = useSubjectQuery();
   const createMutation = useCreateSubject();
   const updateMutation = useUpdateSubject();
-  const deleteMutation = useDeleteSubject();
+  const softDeleteMutation = useSoftDeleteSubject();
   const restoreMutation = useRestoreSubject();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingSubject, setEditingSubject] = useState<Subject | null>(null);
@@ -33,7 +37,6 @@ const ManagerSubjectPage = () => {
     if (subject) {
       setEditingSubject(subject);
       reset({
-        code: subject.code,
         name: subject.name,
         englishName: subject.englishName,
         description: subject.description,
@@ -41,7 +44,6 @@ const ManagerSubjectPage = () => {
     } else {
       setEditingSubject(null);
       reset({
-        code: "",
         name: "",
         description: "",
         englishName: "",
@@ -108,27 +110,21 @@ const ManagerSubjectPage = () => {
       render: (_: any, record: Subject) => (
         <div className="space-x-2">
           <Button type="link" onClick={() => openModal(record)}>
-            Sửa
+            <EditOutlined />
           </Button>
           {!record.deletedAt ? (
             <Popconfirm
               title="Bạn chắc chắn muốn xóa?"
-              onConfirm={() => deleteMutation.mutate(record._id)}
-              okText="Xóa"
-              cancelText="Hủy"
+              onConfirm={() => softDeleteMutation.mutate(record._id)}
             >
-              <Button type="link" danger>
-                <DeleteOutlined /> Xoá
-              </Button>
+              <Button type="link" danger icon={<DeleteOutlined />}></Button>
             </Popconfirm>
           ) : (
             <Button
               type="link"
               onClick={() => restoreMutation.mutate(record._id)}
-            >
-              <RotateLeftOutlined />
-              Khôi phục
-            </Button>
+              icon={<RotateLeftOutlined />}
+            ></Button>
           )}
         </div>
       ),
@@ -143,9 +139,22 @@ const ManagerSubjectPage = () => {
           Thêm môn
         </Button>
       </div>
+      <Input.Search
+        placeholder="Tìm kiếm ngành..."
+        onSearch={(value) => {
+          setQueryParams((prev) => ({
+            ...prev,
+            search: value,
+            searchFields: ["name", "description"],
+            page: 1,
+          }));
+        }}
+        allowClear
+        className="mb-4 max-w-sm"
+      />
 
       <Table
-        dataSource={subject?.filter((m) => !m.deletedAt)}
+        dataSource={subject}
         columns={columns}
         rowKey="_id"
         loading={isLoading}
@@ -173,16 +182,6 @@ const ManagerSubjectPage = () => {
           <Form.Item label="English Name">
             <Controller
               name="englishName"
-              control={control}
-              rules={{ required: true }}
-              render={({ field }) => (
-                <Input {...field} placeholder="Nhập mã môn" />
-              )}
-            />
-          </Form.Item>
-          <Form.Item label="Mã môn">
-            <Controller
-              name="code"
               control={control}
               rules={{ required: true }}
               render={({ field }) => (

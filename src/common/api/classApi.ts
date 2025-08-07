@@ -32,6 +32,11 @@ export const deleteClass = async (id: string) => {
   const res = await api.delete(`/classes/${id}`);
   return res.data;
 };
+
+export const softDelteClass = async (id: string) => {
+  const res = await api.patch(`/classes/soft-delete/${id}`);
+  return res.data;
+};
 export const restoreClass = async (id: string) => {
   const res = await api.patch(`/classes/restore/${id}`);
   return res.data;

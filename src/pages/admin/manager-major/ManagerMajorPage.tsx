@@ -1,4 +1,8 @@
-import { DeleteOutlined, RotateLeftOutlined } from "@ant-design/icons";
+import {
+  DeleteOutlined,
+  EditOutlined,
+  RotateLeftOutlined,
+} from "@ant-design/icons";
 import {
   Button,
   Form,
@@ -14,16 +18,16 @@ import { Controller, useForm } from "react-hook-form";
 import { Major } from "../../../common/api/majorApi";
 import {
   useCreateMajor,
-  useDeleteMajor,
   useMajorsQuery,
   useRestoreMajor,
+  useSoftDeleteMajor,
   useUpdateMajor,
 } from "../../../common/hooks/useMajorQuery";
 const ManagerMajorPage = () => {
   const { data: majors, isLoading } = useMajorsQuery();
   const createMutation = useCreateMajor();
   const updateMutation = useUpdateMajor();
-  const deleteMutation = useDeleteMajor();
+  const softDeleteMutation = useSoftDeleteMajor();
   const restoreMutation = useRestoreMajor();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingMajor, setEditingMajor] = useState<Major | null>(null);
@@ -71,22 +75,45 @@ const ManagerMajorPage = () => {
       title: "Mã ngành",
       dataIndex: "code",
       key: "code",
+      filters: majors
+        ?.map((m) => ({ text: m.code, value: m.code }))
+        .filter((v, i, a) => a.findIndex((t) => t.value === v.value) === i),
+      onFilter: (value, record) => record.code.includes(value),
     },
     {
       title: "Tên ngành",
       dataIndex: "name",
       key: "name",
+      filters: majors
+        ?.map((m) => ({ text: m.name, value: m.name }))
+        .filter((v, i, a) => a.findIndex((t) => t.value === v.value) === i),
+      onFilter: (value: any, record: any) => record.name.includes(value),
     },
     {
       title: "Mô tả",
       dataIndex: "description",
       key: "description",
+      filters: majors
+        ?.filter((m) => m.description)
+        .map((m) => ({ text: m.description, value: m.description }))
+        .filter((v, i, a) => a.findIndex((t) => t.value === v.value) === i),
+      onFilter: (value: any, record: any) =>
+        record.description?.includes(value),
     },
     {
       title: "Trạng thái",
       dataIndex: "deletedAt",
       key: "deletedAt",
       width: 120,
+      filters: [
+        { text: "Hoạt động", value: "active" },
+        { text: "Đã xóa", value: "deleted" },
+      ],
+      onFilter: (value: any, record: any) => {
+        if (value === "active") return !record.deletedAt;
+        if (value === "deleted") return !!record.deletedAt;
+        return true;
+      },
       render: (deletedAt: string | null) =>
         deletedAt ? (
           <Tag color="red">Đã xóa</Tag>
@@ -100,27 +127,21 @@ const ManagerMajorPage = () => {
       render: (_: any, record: Major) => (
         <div className="space-x-2">
           <Button type="link" onClick={() => openModal(record)}>
-            Sửa
+            <EditOutlined />
           </Button>
           {!record.deletedAt ? (
             <Popconfirm
               title="Bạn chắc chắn muốn xóa?"
-              onConfirm={() => deleteMutation.mutate(record._id)}
-              okText="Xóa"
-              cancelText="Hủy"
+              onConfirm={() => softDeleteMutation.mutate(record._id)}
             >
-              <Button type="link" danger>
-                <DeleteOutlined /> Xoá
-              </Button>
+              <Button type="link" danger icon={<DeleteOutlined />} />
             </Popconfirm>
           ) : (
             <Button
               type="link"
               onClick={() => restoreMutation.mutate(record._id)}
-            >
-              <RotateLeftOutlined />
-              Khôi phục
-            </Button>
+              icon={<RotateLeftOutlined />}
+            />
           )}
         </div>
       ),
@@ -131,10 +152,24 @@ const ManagerMajorPage = () => {
     <div className="p-6 max-w-6xl mx-auto">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Quản lý ngành học</h1>
+
         <Button type="primary" onClick={() => openModal()}>
           Thêm ngành
         </Button>
       </div>
+      <Input.Search
+        placeholder="Tìm kiếm ngành..."
+        onSearch={(value) => {
+          setQueryParams((prev) => ({
+            ...prev,
+            search: value,
+            searchFields: ["name", "description"],
+            page: 1,
+          }));
+        }}
+        allowClear
+        className="mb-4 max-w-sm"
+      />
 
       <Table
         dataSource={majors?.filter((m) => !m.isDeleted)}

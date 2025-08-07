@@ -6,6 +6,7 @@ import {
   deleteClass,
   Class,
   restoreClass,
+  softDelteClass,
 } from "../api/classApi";
 import { message } from "antd";
 
@@ -57,6 +58,13 @@ export const useDeleteClass = () => {
     onError: () => {
       message.error("Xóa thất bại");
     },
+  });
+};
+export const useSoftDeleteClass = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: softDelteClass,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["Class"] }),
   });
 };
 

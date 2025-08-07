@@ -1,13 +1,17 @@
-import { DeleteOutlined, RotateLeftOutlined } from "@ant-design/icons";
-import { Button, message, Popconfirm, Table, Tag } from "antd";
+import {
+  DeleteOutlined,
+  EditOutlined,
+  RotateLeftOutlined,
+} from "@ant-design/icons";
+import { Button, Input, message, Popconfirm, Table, Tag } from "antd";
 import { useState } from "react";
 import { Class } from "../../../common/api/classApi";
 import {
   useCreateClass,
-  useDeleteClass,
   useRestoreClass,
   useClassQuery,
   useUpdateClass,
+  useSoftDeleteClass,
 } from "../../../common/hooks/useClassQuery";
 import ClassModalForm from "../../../components/ClassModalForm";
 import dayjs from "dayjs";
@@ -16,7 +20,7 @@ const ManagerClassPage = () => {
   const { data: classes, isLoading } = useClassQuery();
   const createMutation = useCreateClass();
   const updateMutation = useUpdateClass();
-  const deleteMutation = useDeleteClass();
+  const softDeleteMutation = useSoftDeleteClass();
   const restoreMutation = useRestoreClass();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingClass, setEditingClass] = useState<Class | null>(null);
@@ -46,6 +50,11 @@ const ManagerClassPage = () => {
 
   const columns = [
     {
+      title: "Tên lớp",
+      dataIndex: "name",
+      key: "name",
+    },
+    {
       title: "Môn học",
       dataIndex: "subjectId",
       key: "subjectId",
@@ -57,11 +66,7 @@ const ManagerClassPage = () => {
       key: "majorId",
       render: (item: any) => <p>{item?.name ?? "Chưa có chuyên ngành"}</p>,
     },
-    {
-      title: "Tên lớp",
-      dataIndex: "name",
-      key: "name",
-    },
+
     {
       title: "Giáo viên",
       dataIndex: "teacherId",
@@ -109,25 +114,21 @@ const ManagerClassPage = () => {
       render: (_: any, record: Class) => (
         <div className="space-x-2">
           <Button type="link" onClick={() => openModal(record)}>
-            Sửa
+            <EditOutlined />
           </Button>
           {!record.deletedAt ? (
             <Popconfirm
               title="Bạn chắc chắn muốn xóa?"
-              onConfirm={() => deleteMutation.mutate(record._id)}
+              onConfirm={() => softDeleteMutation.mutate(record._id)}
             >
-              <Button type="link" danger icon={<DeleteOutlined />}>
-                Xoá
-              </Button>
+              <Button type="link" danger icon={<DeleteOutlined />}></Button>
             </Popconfirm>
           ) : (
             <Button
               type="link"
               onClick={() => restoreMutation.mutate(record._id)}
               icon={<RotateLeftOutlined />}
-            >
-              Khôi phục
-            </Button>
+            ></Button>
           )}
         </div>
       ),
@@ -138,10 +139,25 @@ const ManagerClassPage = () => {
     <div className="p-6 max-w-6xl mx-auto">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Quản lý lớp học</h1>
-        <Button type="primary" onClick={() => openModal()}>
-          Thêm lớp
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button type="primary" onClick={() => openModal()}>
+            Thêm lớp
+          </Button>
+        </div>
       </div>
+      <Input.Search
+        placeholder="Tìm kiếm ngành..."
+        onSearch={(value) => {
+          setQueryParams((prev) => ({
+            ...prev,
+            search: value,
+            searchFields: ["name", "description"],
+            page: 1,
+          }));
+        }}
+        allowClear
+        className="mb-4 max-w-sm"
+      />
 
       <Table
         dataSource={classes}
