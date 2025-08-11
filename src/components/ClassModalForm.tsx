@@ -95,7 +95,7 @@ const ClassModalForm = ({ open, onClose, onSubmit, initialData }: Props) => {
                   {...field}
                   value={field.value ?? undefined}
                   onChange={(value) => field.onChange(value)}
-                  options={subjects?.map((s) => ({
+                  options={subjects?.data?.map((s) => ({
                     label: s.name,
                     value: s._id,
                   }))}
@@ -119,7 +119,7 @@ const ClassModalForm = ({ open, onClose, onSubmit, initialData }: Props) => {
                   {...field}
                   value={field.value ?? undefined}
                   onChange={(value) => field.onChange(value)}
-                  options={majors?.map((m) => ({
+                  options={majors?.data?.map((m) => ({
                     label: m.name,
                     value: m._id,
                   }))}
