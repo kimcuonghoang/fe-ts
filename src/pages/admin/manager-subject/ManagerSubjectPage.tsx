@@ -13,19 +13,25 @@ import {
   Table,
   Tag,
 } from "antd";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { Subject } from "../../../common/api/subjectApi";
+
 import {
   useCreateSubject,
   useRestoreSubject,
   useSoftDeleteSubject,
-  useSubjectQuery,
+  useSubjectsQuery,
   useUpdateSubject,
 } from "../../../common/hooks/useSubjectQuery";
+import { Subject } from "../../../common/types/subject";
+import { Params } from "../../../common/types/api";
 
 const ManagerSubjectPage = () => {
-  const { data: subject, isLoading } = useSubjectQuery();
+  const [params, setParams] = useState<Params>({
+    page: 1,
+    limit: 5,
+  });
+  const { data, isLoading } = useSubjectsQuery(params);
   const createMutation = useCreateSubject();
   const updateMutation = useUpdateSubject();
   const softDeleteMutation = useSoftDeleteSubject();
@@ -70,66 +76,90 @@ const ManagerSubjectPage = () => {
       message.error("Đã có lỗi xảy ra.");
     }
   };
-
-  const columns = [
-    {
-      title: "Tên môn",
-      dataIndex: "name",
-      key: "name",
-    },
-    {
-      title: "englishName",
-      dataIndex: "englishName",
-      key: "englishName",
-    },
-    {
-      title: "Mã môn",
-      dataIndex: "code",
-      key: "code",
-    },
-    {
-      title: "Mô tả",
-      dataIndex: "description",
-      key: "description",
-    },
-    {
-      title: "Trạng thái",
-      dataIndex: "deletedAt",
-      key: "deletedAt",
-      width: 120,
-      render: (deletedAt: string | null) =>
-        deletedAt ? (
-          <Tag color="red">Đã xóa</Tag>
-        ) : (
-          <Tag color="green">Hoạt động</Tag>
-        ),
-    },
-    {
-      title: "Thao tác",
-      key: "actions",
-      render: (_: any, record: Subject) => (
-        <div className="space-x-2">
-          <Button type="link" onClick={() => openModal(record)}>
-            <EditOutlined />
-          </Button>
-          {!record.deletedAt ? (
-            <Popconfirm
-              title="Bạn chắc chắn muốn xóa?"
-              onConfirm={() => softDeleteMutation.mutate(record._id)}
-            >
-              <Button type="link" danger icon={<DeleteOutlined />}></Button>
-            </Popconfirm>
+  const handleSearch = (value: string) => {
+    setParams((prev) => ({
+      ...prev,
+      search: value.trim(),
+      page: 1,
+    }));
+  };
+  const handleTableChange = (pagination: any, _: any, sorter: any) => {
+    setParams((prev) => ({
+      ...prev,
+      page: pagination.current,
+      limit: pagination.pageSize,
+      sort: sorter.field || undefined,
+      order:
+        sorter.order === "ascend"
+          ? "asc"
+          : sorter.order === "descend"
+          ? "desc"
+          : undefined,
+    }));
+  };
+  const columns = useMemo(
+    () => [
+      {
+        title: "Tên môn",
+        dataIndex: "name",
+        key: "name",
+        sorter: true,
+      },
+      {
+        title: "englishName",
+        dataIndex: "englishName",
+        key: "englishName",
+      },
+      {
+        title: "Mã môn",
+        dataIndex: "code",
+        key: "code",
+      },
+      {
+        title: "Mô tả",
+        dataIndex: "description",
+        key: "description",
+      },
+      {
+        title: "Trạng thái",
+        dataIndex: "deletedAt",
+        key: "deletedAt",
+        width: 120,
+        render: (deletedAt: string | null) =>
+          deletedAt ? (
+            <Tag color="red">Đã xóa</Tag>
           ) : (
-            <Button
-              type="link"
-              onClick={() => restoreMutation.mutate(record._id)}
-              icon={<RotateLeftOutlined />}
-            ></Button>
-          )}
-        </div>
-      ),
-    },
-  ];
+            <Tag color="green">Hoạt động</Tag>
+          ),
+      },
+      {
+        title: "Thao tác",
+        key: "actions",
+        render: (_: any, record: Subject) => (
+          <div className="space-x-2">
+            <Button type="link" onClick={() => openModal(record)}>
+              <EditOutlined />
+            </Button>
+            {!record.deletedAt ? (
+              <Popconfirm
+                title="Bạn chắc chắn muốn xóa?"
+                onConfirm={() => softDeleteMutation.mutate(record._id)}
+              >
+                <Button type="link" danger icon={<DeleteOutlined />}></Button>
+              </Popconfirm>
+            ) : (
+              <Button
+                type="link"
+                onClick={() => restoreMutation.mutate(record._id)}
+                icon={<RotateLeftOutlined />}
+              ></Button>
+            )}
+          </div>
+        ),
+      },
+    ],
+    []
+  );
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
@@ -141,24 +171,22 @@ const ManagerSubjectPage = () => {
       </div>
       <Input.Search
         placeholder="Tìm kiếm ngành..."
-        onSearch={(value) => {
-          setQueryParams((prev) => ({
-            ...prev,
-            search: value,
-            searchFields: ["name", "description"],
-            page: 1,
-          }));
-        }}
+        onSearch={handleSearch}
         allowClear
         className="mb-4 max-w-sm"
       />
 
       <Table
-        dataSource={subject}
+        dataSource={data?.data || []}
         columns={columns}
         rowKey="_id"
         loading={isLoading}
-        pagination={{ pageSize: 5 }}
+        pagination={{
+          current: params.page,
+          pageSize: params.limit,
+          total: data?.meta.total,
+        }}
+        onChange={handleTableChange}
       />
 
       <Modal

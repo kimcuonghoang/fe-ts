@@ -1,19 +1,20 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  getSubject,
+  getAllSubjects,
   createSubject,
   updateSubject,
-  deleteSubject,
-  Subject,
   restoreSubject,
   softDeleteSubject,
 } from "../api/subjectApi";
 import { message } from "antd";
+import { Subject } from "../types/subject";
+import { IResponse, Params } from "../types/api";
 
-export const useSubjectQuery = () => {
-  return useQuery<Subject[]>({
-    queryKey: ["subject"],
-    queryFn: getSubject,
+export const useSubjectsQuery = (params?: Params) => {
+  return useQuery<IResponse<Subject[]>>({
+    queryKey: ["subjects", params],
+    queryFn: () => getAllSubjects(params),
+    staleTime: 1000 * 60 * 5,
     gcTime: 1000 * 60 * 5,
   });
 };
@@ -23,7 +24,7 @@ export const useCreateSubject = () => {
   return useMutation({
     mutationFn: createSubject,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["subject"] });
+      queryClient.invalidateQueries({ queryKey: ["subjects"] });
       message.success("Tạo mới thành công");
     },
     onError: () => {
@@ -38,7 +39,7 @@ export const useUpdateSubject = () => {
     mutationFn: ({ id, data }: { id: string; data: Omit<Subject, "_id"> }) =>
       updateSubject(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["subject"] });
+      queryClient.invalidateQueries({ queryKey: ["subjects"] });
       message.success("Cập nhật thành công");
     },
     onError: () => {
@@ -47,31 +48,17 @@ export const useUpdateSubject = () => {
   });
 };
 
-export const useDeleteSubject = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: deleteSubject,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["subject"] });
-      message.success("Xóa thành công!");
-    },
-    onError: () => {
-      message.error("Xóa thất bại");
-    },
-  });
-};
 export const useSoftDeleteSubject = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: softDeleteSubject,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["subject"] }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["subjects"] }),
   });
 };
-
 export const useRestoreSubject = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: restoreSubject,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["subject"] }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["subjects"] }),
   });
 };

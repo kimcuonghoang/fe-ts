@@ -1,19 +1,20 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  getMajors,
+  getAllMajors,
   createMajor,
   updateMajor,
-  deleteMajor,
-  Major,
   restoreMajor,
   softDeleteMajor,
 } from "../api/majorApi";
 import { message } from "antd";
+import { Major } from "../types/major";
+import { IResponse, Params } from "../types/api";
 
-export const useMajorsQuery = () => {
-  return useQuery<Major[]>({
-    queryKey: ["majors"],
-    queryFn: getMajors,
+export const useMajorsQuery = (params?: Params) => {
+  return useQuery<IResponse<Major[]>>({
+    queryKey: ["majors", params],
+    queryFn: () => getAllMajors(params),
+    staleTime: 1000 * 60 * 5,
     gcTime: 1000 * 60 * 5,
   });
 };
@@ -47,19 +48,6 @@ export const useUpdateMajor = () => {
   });
 };
 
-export const useDeleteMajor = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: deleteMajor,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["majors"] });
-      message.success("Xóa thành công!");
-    },
-    onError: () => {
-      message.error("Xóa thất bại");
-    },
-  });
-};
 export const useSoftDeleteMajor = () => {
   const queryClient = useQueryClient();
   return useMutation({

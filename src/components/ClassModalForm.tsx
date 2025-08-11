@@ -13,9 +13,9 @@ import { useEffect } from "react";
 import dayjs from "dayjs";
 import { Class } from "../common/api/classApi";
 
-import { useSubjectQuery } from "../common/hooks/useSubjectQuery";
 import { useMajorsQuery } from "../common/hooks/useMajorQuery";
 import { useStudentQuery, useTeacherQuery } from "../common/hooks/useUserQuery";
+import { useSubjectsQuery } from "../common/hooks/useSubjectQuery";
 
 interface Props {
   open: boolean;
@@ -31,7 +31,7 @@ type FormValues = Omit<Class, "_id"> & {
 const ClassModalForm = ({ open, onClose, onSubmit, initialData }: Props) => {
   const { control, handleSubmit, reset } = useForm<FormValues>();
 
-  const { data: subjects, isLoading: isSubjectsLoading } = useSubjectQuery();
+  const { data: subjects, isLoading: isSubjectsLoading } = useSubjectsQuery();
   const { data: majors, isLoading: isMajorsLoading } = useMajorsQuery();
   const { data: teachers, isLoading: isTeachersLoading } = useTeacherQuery();
   const { data: students, isLoading: isStudentsLoading } = useStudentQuery();
