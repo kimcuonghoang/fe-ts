@@ -1,46 +1,48 @@
-import React, { useState } from "react";
-import { useForm } from "react-hook-form";
-import {
-  LockOutlined,
-  EyeOutlined,
-  EyeInvisibleOutlined,
-} from "@ant-design/icons";
+import { Controller, useForm } from "react-hook-form";
+import { LockOutlined } from "@ant-design/icons";
 import { useNavigate, useParams } from "react-router-dom";
-import { message } from "antd";
+import { Button, Form, Input, message } from "antd";
 import { authResetPassword } from "../../common/api/authApi";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { resetPasswordSchema } from "../../common/validations/authSchema";
+import { useMutation } from "@tanstack/react-query";
 
 type FormData = {
-  password: string;
   confirmPassword: string;
+  resetToken: string;
+  newPassword: string;
 };
 
 const ResetPasswordPage = () => {
+  const { resetToken } = useParams();
   const {
-    register,
+    control,
     handleSubmit,
-    watch,
     formState: { errors },
-  } = useForm<FormData>();
-
-  const [showPassword, setShowPassword] = useState(false);
-  const togglePassword = () => setShowPassword(!showPassword);
+  } = useForm<FormData>({
+    resolver: zodResolver(resetPasswordSchema),
+    defaultValues: {
+      resetToken: resetToken,
+    },
+  });
 
   const navigate = useNavigate();
-  const { resetToken } = useParams(); // giả sử reset link có `/reset-password/:token`
-
+  const { mutate, isPending } = useMutation({
+    mutationKey: ["resetPassword"],
+    mutationFn: async (data: FormData) =>
+      authResetPassword(resetToken!, data.newPassword),
+  });
   const onSubmit = async (data: FormData) => {
-    try {
-      await authResetPassword(resetToken!, data.password);
-
-      message.success("Đặt lại mật khẩu thành công!");
-      navigate("/login");
-    } catch (err) {
-      console.error(err);
-      message.error("Không thể đặt lại mật khẩu. Hãy thử lại.");
-    }
+    mutate(data, {
+      onSuccess: () => {
+        message.success("Đặt lại mật khẩu thành công!");
+        navigate("/login");
+      },
+      onError: () => {
+        message.error("Không thể đặt lại mật khẩu. Hãy thử lại.");
+      },
+    });
   };
-
-  const password = watch("password");
 
   return (
     <div className="min-h-screen flex items-center justify-center  px-4">
@@ -48,73 +50,56 @@ const ResetPasswordPage = () => {
         <h2 className="text-2xl font-bold text-center text-blue-600 mb-6">
           Đặt lại mật khẩu
         </h2>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-          {/* New Password */}
-          <div>
-            <label className="block font-medium mb-1">Mật khẩu mới</label>
-            <div className="relative">
-              <LockOutlined className="absolute top-3 left-3 text-blue-500" />
-              <input
-                type={showPassword ? "text" : "password"}
-                {...register("password", {
-                  required: "Vui lòng nhập mật khẩu mới!",
-                  minLength: {
-                    value: 6,
-                    message: "Mật khẩu tối thiểu 6 ký tự",
-                  },
-                })}
-                placeholder="••••••••"
-                className={`pl-10 pr-10 py-2 border rounded-md w-full ${
-                  errors.password ? "border-red-500" : "border-gray-300"
-                }`}
-              />
-              <button
-                type="button"
-                onClick={togglePassword}
-                className="absolute right-3 top-2.5 text-blue-500"
-              >
-                {showPassword ? <EyeInvisibleOutlined /> : <EyeOutlined />}
-              </button>
-            </div>
-            {errors.password && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.password.message}
-              </p>
-            )}
-          </div>
-
-          {/* Confirm Password */}
-          <div>
-            <label className="block font-medium mb-1">Xác nhận mật khẩu</label>
-            <div className="relative">
-              <LockOutlined className="absolute top-3 left-3 text-blue-500" />
-              <input
-                type="password"
-                {...register("confirmPassword", {
-                  required: "Vui lòng xác nhận mật khẩu!",
-                  validate: (value) =>
-                    value === password || "Mật khẩu không khớp!",
-                })}
-                placeholder="••••••••"
-                className={`pl-10 py-2 border rounded-md w-full ${
-                  errors.confirmPassword ? "border-red-500" : "border-gray-300"
-                }`}
-              />
-            </div>
-            {errors.confirmPassword && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.confirmPassword.message}
-              </p>
-            )}
-          </div>
-
-          <button
-            type="submit"
-            className="w-full py-2 text-white bg-blue-600 hover:bg-blue-700 font-semibold rounded-md"
+        <Form layout="vertical" onFinish={handleSubmit(onSubmit)}>
+          <Form.Item
+            label="Mật khẩu"
+            help={errors.newPassword?.message}
+            validateStatus={errors.newPassword ? "error" : ""}
           >
-            Xác nhận
-          </button>
-        </form>
+            <Controller
+              name="newPassword"
+              control={control}
+              render={({ field }) => (
+                <Input.Password
+                  {...field}
+                  prefix={<LockOutlined className="text-blue-500" />}
+                  placeholder="••••••••"
+                  size="large"
+                />
+              )}
+            />
+          </Form.Item>
+          <Form.Item
+            label="Xác nhận mật khẩu"
+            help={errors.confirmPassword?.message}
+            validateStatus={errors.confirmPassword ? "error" : ""}
+          >
+            <Controller
+              name="confirmPassword"
+              control={control}
+              render={({ field }) => (
+                <Input.Password
+                  {...field}
+                  prefix={<LockOutlined className="text-blue-500" />}
+                  placeholder="Xác nhận mật khẩu"
+                  size="large"
+                />
+              )}
+            />
+          </Form.Item>
+          <Form.Item>
+            <Button
+              type="primary"
+              htmlType="submit"
+              block
+              loading={isPending}
+              size="large"
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              Đăng nhập
+            </Button>
+          </Form.Item>
+        </Form>
       </div>
     </div>
   );

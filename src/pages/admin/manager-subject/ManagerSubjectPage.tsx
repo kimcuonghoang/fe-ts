@@ -14,7 +14,7 @@ import {
   Tag,
 } from "antd";
 import { useMemo, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, Resolver, useForm } from "react-hook-form";
 
 import {
   useCreateSubject,
@@ -25,6 +25,11 @@ import {
 } from "../../../common/hooks/useSubjectQuery";
 import { Subject } from "../../../common/types/subject";
 import { Params } from "../../../common/types/api";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  createSubjectSchema,
+  updateSubjectSchema,
+} from "../../../common/validations/subjectSchema";
 
 const ManagerSubjectPage = () => {
   const [params, setParams] = useState<Params>({
@@ -38,7 +43,16 @@ const ManagerSubjectPage = () => {
   const restoreMutation = useRestoreSubject();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingSubject, setEditingSubject] = useState<Subject | null>(null);
-  const { handleSubmit, reset, control } = useForm<Omit<Subject, "_id">>();
+  const {
+    handleSubmit,
+    reset,
+    control,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(
+      editingSubject ? createSubjectSchema : updateSubjectSchema
+    ) as Resolver<Omit<Subject, "_id" | "code">>,
+  });
   const openModal = (subject?: Subject) => {
     if (subject) {
       setEditingSubject(subject);
@@ -196,8 +210,13 @@ const ManagerSubjectPage = () => {
         title={editingSubject ? "Cập nhật môn" : "Thêm môn"}
         destroyOnClose
       >
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <Form.Item label="Tên môn">
+        <Form onFinish={handleSubmit(onSubmit)} className="space-y-4">
+          <Form.Item
+            label="Tên môn"
+            required
+            help={errors.name?.message}
+            validateStatus={errors.name ? "error" : ""}
+          >
             <Controller
               name="name"
               control={control}
@@ -207,7 +226,12 @@ const ManagerSubjectPage = () => {
               )}
             />
           </Form.Item>
-          <Form.Item label="English Name">
+          <Form.Item
+            label="English Name"
+            required
+            help={errors.englishName?.message}
+            validateStatus={errors.englishName ? "error" : ""}
+          >
             <Controller
               name="englishName"
               control={control}
@@ -217,7 +241,12 @@ const ManagerSubjectPage = () => {
               )}
             />
           </Form.Item>
-          <Form.Item label="Mô tả">
+          <Form.Item
+            label="Mô tả"
+            required
+            help={errors.description?.message}
+            validateStatus={errors.description ? "error" : ""}
+          >
             <Controller
               name="description"
               control={control}
@@ -232,7 +261,7 @@ const ManagerSubjectPage = () => {
               {editingSubject ? "Cập nhật" : "Thêm mới"}
             </Button>
           </div>
-        </form>
+        </Form>
       </Modal>
     </div>
   );

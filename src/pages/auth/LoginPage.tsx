@@ -1,4 +1,3 @@
-import React, { useState } from "react";
 import { Button, Form, Input, Typography, message } from "antd";
 import { LockOutlined, MailOutlined } from "@ant-design/icons";
 import { Link, useNavigate } from "react-router-dom";
@@ -8,11 +7,22 @@ import {
   setAccessToken,
   setRefreshToken,
 } from "../../common/utils/localStrorage";
+import { Controller, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { loginSchema } from "../../common/validations/authSchema";
 
 const { Title } = Typography;
 
 const LoginPage = () => {
   const nav = useNavigate();
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(loginSchema),
+  });
+
   const { mutate, isPending } = useMutation({
     mutationKey: ["login"],
     mutationFn: async (values: any) => authLogin(values),
@@ -30,7 +40,7 @@ const LoginPage = () => {
       },
       onError: (err) => {
         console.error("Login error:", err);
-        message.error("Đăng nhập thất bại, vui lòng thử lại.");
+        message.error("Đăng nhập thất bại. Vui lòng thử lại!");
       },
     });
   };
@@ -41,31 +51,42 @@ const LoginPage = () => {
         Đăng nhập tài khoản
       </Title>
 
-      <Form layout="vertical" onFinish={onFinish}>
+      <Form layout="vertical" onFinish={handleSubmit(onFinish)}>
         <Form.Item
-          name="email"
           label="Email"
-          rules={[
-            { required: true, message: "Vui lòng nhập email!" },
-            { type: "email", message: "Email không hợp lệ!" },
-          ]}
+          help={errors.email?.message}
+          validateStatus={errors.email ? "error" : ""}
         >
-          <Input
-            prefix={<MailOutlined className="text-blue-500" />}
-            placeholder="example@email.com"
-            size="large"
+          <Controller
+            name="email"
+            control={control}
+            render={({ field }) => (
+              <Input
+                {...field}
+                prefix={<MailOutlined className="text-blue-500" />}
+                placeholder="example@email.com"
+                size="large"
+              />
+            )}
           />
         </Form.Item>
 
         <Form.Item
-          name="password"
           label="Mật khẩu"
-          rules={[{ required: true, message: "Vui lòng nhập mật khẩu!" }]}
+          help={errors.password?.message}
+          validateStatus={errors.password ? "error" : ""}
         >
-          <Input.Password
-            prefix={<LockOutlined className="text-blue-500" />}
-            placeholder="••••••••"
-            size="large"
+          <Controller
+            name="password"
+            control={control}
+            render={({ field }) => (
+              <Input.Password
+                {...field}
+                prefix={<LockOutlined className="text-blue-500" />}
+                placeholder="••••••••"
+                size="large"
+              />
+            )}
           />
         </Form.Item>
 

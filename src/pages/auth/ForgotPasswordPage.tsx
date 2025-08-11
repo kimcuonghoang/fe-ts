@@ -1,26 +1,29 @@
-import React, { useState } from "react";
 import { Form, Input, Button, Typography, message } from "antd";
 import { MailOutlined } from "@ant-design/icons";
 import { Link } from "react-router-dom";
 import { authForgotPassword } from "../../common/api/authApi";
+import { useMutation } from "@tanstack/react-query";
 
 const { Title, Paragraph } = Typography;
 
-const ForgotPasswordPage = () => {
-  const [loading, setLoading] = useState(false);
+type FormData = {
+  email: string;
+};
 
-  const onFinish = async (values: any) => {
-    setLoading(true);
-    try {
-      await authForgotPassword(values.email);
-      console.log("Forgot password email:", values.email);
-      await new Promise((res) => setTimeout(res, 1000));
-      message.success("Email khôi phục mật khẩu đã được gửi!");
-    } catch (error) {
-      message.error("Có lỗi xảy ra, vui lòng thử lại.");
-    } finally {
-      setLoading(false);
-    }
+const ForgotPasswordPage = () => {
+  const { mutate, isPending } = useMutation({
+    mutationKey: ["forgotPassword"],
+    mutationFn: async (data: FormData) => authForgotPassword(data.email),
+  });
+  const onFinish = async (values: FormData) => {
+    mutate(values, {
+      onSuccess: () => {
+        message.success("Email khôi phục mật khẩu đã được gửi!");
+      },
+      onError: () => {
+        message.error("Có lỗi xảy ra, vui lòng thử lại.");
+      },
+    });
   };
 
   return (
@@ -55,7 +58,7 @@ const ForgotPasswordPage = () => {
             type="primary"
             htmlType="submit"
             block
-            loading={loading}
+            loading={isPending}
             size="large"
             className="bg-blue-600 hover:bg-blue-700"
           >

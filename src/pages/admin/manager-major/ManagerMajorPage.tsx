@@ -14,7 +14,7 @@ import {
   Tag,
 } from "antd";
 import { useState, useMemo } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, Resolver, useForm } from "react-hook-form";
 import {
   useCreateMajor,
   useMajorsQuery,
@@ -24,7 +24,11 @@ import {
 } from "../../../common/hooks/useMajorQuery";
 import { Major } from "../../../common/types/major";
 import { Params } from "../../../common/types/api";
-
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  createMajorSchema,
+  updateMajorSchema,
+} from "../../../common/validations/majorSchema";
 const ManagerMajorPage = () => {
   const [params, setParams] = useState<Params>({
     page: 1,
@@ -39,7 +43,16 @@ const ManagerMajorPage = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingMajor, setEditingMajor] = useState<Major | null>(null);
-  const { handleSubmit, reset, control } = useForm<Omit<Major, "_id">>();
+  const {
+    handleSubmit,
+    reset,
+    control,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(
+      editingMajor ? updateMajorSchema : createMajorSchema
+    ) as Resolver<Omit<Major, "_id">>,
+  });
 
   const openModal = (major?: Major) => {
     if (major) {
@@ -198,29 +211,54 @@ const ManagerMajorPage = () => {
         destroyOnClose
       >
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <Form.Item label="Mã ngành" required>
+          <Form.Item
+            label="Mã ngành"
+            required
+            help={errors.code?.message}
+            validateStatus={errors.code ? "error" : ""}
+          >
             <Controller
               name="code"
               control={control}
-              rules={{ required: true }}
-              render={({ field }) => <Input {...field} />}
+              render={({ field }) => (
+                <Input {...field} placeholder="Nhập mã ngành" />
+              )}
             />
           </Form.Item>
-          <Form.Item label="Tên ngành" required>
+
+          <Form.Item
+            label="Tên ngành"
+            required
+            help={errors.name?.message}
+            validateStatus={errors.name ? "error" : ""}
+          >
             <Controller
               name="name"
               control={control}
-              rules={{ required: true }}
-              render={({ field }) => <Input {...field} />}
+              render={({ field }) => (
+                <Input {...field} placeholder="Nhập tên ngành" />
+              )}
             />
           </Form.Item>
-          <Form.Item label="Mô tả">
+
+          <Form.Item
+            label="Mô tả"
+            help={errors.description?.message}
+            validateStatus={errors.description ? "error" : ""}
+          >
             <Controller
               name="description"
               control={control}
-              render={({ field }) => <Input.TextArea {...field} rows={4} />}
+              render={({ field }) => (
+                <Input.TextArea
+                  {...field}
+                  rows={4}
+                  placeholder="Nhập mô tả ngành"
+                />
+              )}
             />
           </Form.Item>
+
           <div className="flex justify-end gap-2">
             <Button onClick={closeModal}>Huỷ</Button>
             <Button type="primary" htmlType="submit">
