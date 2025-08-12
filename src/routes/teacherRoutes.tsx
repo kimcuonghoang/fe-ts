@@ -5,6 +5,9 @@ import ManagerSessionPage from "../pages/teacher/manager-session/ManagerSessionP
 import TeacherLayout from "../components/layouts/TeacherLayout";
 import ProtectedRoute from "./ProtectedRoute";
 import { RoleEnum } from "../common/types";
+import AttendanceTracking from "../pages/teacher/AttendanceTracking";
+import DetailedReports from "../pages/teacher/DetailedReports";
+import Dashboard from "../pages/teacher/DashBoard";
 
 const teacherRoutes: RouteObject[] = [
   {
@@ -15,6 +18,9 @@ const teacherRoutes: RouteObject[] = [
       </ProtectedRoute>
     ),
     children: [
+      { path: "dashboard", element: <Dashboard /> },
+      { path: "attendance", element: <AttendanceTracking /> },
+      { path: "reports", element: <DetailedReports /> },
       {
         path: "classes",
         element: <ManagerClassPage />,

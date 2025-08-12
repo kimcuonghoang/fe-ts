@@ -1,4 +1,3 @@
-import React from "react";
 import { Outlet } from "react-router-dom";
 import { Typography } from "antd";
 import { CheckCircleOutlined, PhoneOutlined } from "@ant-design/icons";

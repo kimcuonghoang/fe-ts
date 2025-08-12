@@ -96,7 +96,7 @@ const ResetPasswordPage = () => {
               size="large"
               className="bg-blue-600 hover:bg-blue-700"
             >
-              Đăng nhập
+              Xác nhận
             </Button>
           </Form.Item>
         </Form>
