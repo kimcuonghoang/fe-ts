@@ -136,35 +136,34 @@ const ManagerClassPage = () => {
   ];
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
+    <>
+      <h1 className="text-2xl font-bold mb-3">Quản lý lớp học</h1>
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">Quản lý lớp học</h1>
-        <div className="flex items-center gap-2">
-          <Button type="primary" onClick={() => openModal()}>
-            Thêm lớp
-          </Button>
-        </div>
+        <Input.Search
+          placeholder="Tìm kiếm ngành..."
+          onSearch={(value) => {
+            setQueryParams((prev) => ({
+              ...prev,
+              search: value,
+              searchFields: ["name", "description"],
+              page: 1,
+            }));
+          }}
+          allowClear
+          className="max-w-sm"
+        />
+
+        <Button type="primary" onClick={() => openModal()}>
+          Thêm lớp
+        </Button>
       </div>
-      <Input.Search
-        placeholder="Tìm kiếm ngành..."
-        onSearch={(value) => {
-          setQueryParams((prev) => ({
-            ...prev,
-            search: value,
-            searchFields: ["name", "description"],
-            page: 1,
-          }));
-        }}
-        allowClear
-        className="mb-4 max-w-sm"
-      />
 
       <Table
         dataSource={classes}
         columns={columns}
         rowKey="_id"
         loading={isLoading}
-        pagination={{ pageSize: 5 }}
+        pagination={{ pageSize: 10 }}
       />
 
       <ClassModalForm
@@ -173,7 +172,7 @@ const ManagerClassPage = () => {
         onSubmit={handleSubmit}
         initialData={editingClass}
       />
-    </div>
+    </>
   );
 };
 

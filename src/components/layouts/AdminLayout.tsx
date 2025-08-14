@@ -58,7 +58,11 @@ const getBreadcrumb = (pathname: string) => {
   return crumbs;
 };
 
-const AdminLayout = () => {
+interface AdminLayoutProps {
+  collapsed: boolean;
+}
+
+const AdminLayout = ({ collapsed }: AdminLayoutProps) => {
   const location = useLocation();
   const {
     token: { colorBgContainer },
@@ -78,7 +82,12 @@ const AdminLayout = () => {
   }, []);
 
   return (
-    <Layout style={{ minHeight: "100vh" }}>
+    <Layout
+      style={{
+        marginLeft: collapsed ? 80 : 280,
+        transition: "margin-left 0.3s",
+      }}
+    >
       <SiderMenu
         menuItems={adminMenu}
         selectedKeys={selectedKeys}

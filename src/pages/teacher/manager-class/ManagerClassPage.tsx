@@ -5,38 +5,44 @@ import {
   ClockCircleOutlined,
   CheckCircleOutlined,
 } from "@ant-design/icons";
-import dayjs from "dayjs";
 import { Link } from "react-router-dom";
 import { useClassQuery } from "../../../common/hooks/useClassQuery";
+import Search from "antd/es/input/Search";
+
+const StatCard = ({
+  value,
+  label,
+  color,
+}: {
+  value: any;
+  label: string;
+  color: string;
+}) => (
+  <Card className="text-center">
+    <div className={`text-2xl font-bold ${color}`}>{value}</div>
+    <div className="text-gray-500">{label}</div>
+  </Card>
+);
 
 const ClassManagement = () => {
-  const { data: classes, isLoading } = useClassQuery();
+  const { data: classes = [], isLoading } = useClassQuery();
 
   const columns = [
     {
       title: "Tên lớp",
       dataIndex: "name",
       key: "name",
-      render: (text: string, record: any) => (
-        <div>
-          <div className="font-medium text-gray-800">{text}</div>
-          <div className="text-sm text-gray-500">
-            {record.subject} - {record.level}
-          </div>
-        </div>
-      ),
     },
     {
       title: "Lịch học",
-      dataIndex: "schedule",
       key: "schedule",
-      render: (text, record) => (
-        <div>
-          <div className="flex items-center text-sm">
+      render: (_: any, record: any) => (
+        <div className="text-sm">
+          <div className="flex items-center">
             <CalendarOutlined className="mr-1 text-blue-500" />
             {record.dayOfWeek}
           </div>
-          <div className="flex items-center text-sm text-gray-500 mt-1">
+          <div className="flex items-center text-gray-500 mt-1">
             <ClockCircleOutlined className="mr-1" />
             Phòng {record.room}
           </div>
@@ -46,8 +52,8 @@ const ClassManagement = () => {
     {
       title: "Sĩ số",
       key: "students",
-      render: (_, record) => (
-        <div>
+      render: (_: any, record: any) => (
+        <>
           <div className="flex items-center">
             <UserOutlined className="mr-1 text-green-500" />
             <span className="font-medium">
@@ -62,24 +68,7 @@ const ClassManagement = () => {
               record.students >= record.maxStudents ? "#ff4d4f" : "#52c41a"
             }
           />
-        </div>
-      ),
-    },
-    {
-      title: "Tỷ lệ tham gia",
-      dataIndex: "attendanceRate",
-      key: "attendanceRate",
-      render: (rate: number) => (
-        <div>
-          <div className="font-medium">{rate}%</div>
-          <Progress
-            percent={rate}
-            size="small"
-            strokeColor={
-              rate >= 90 ? "#52c41a" : rate >= 80 ? "#faad14" : "#ff4d4f"
-            }
-          />
-        </div>
+        </>
       ),
     },
     {
@@ -92,13 +81,6 @@ const ClassManagement = () => {
         ) : (
           <Tag color="green">Hoạt động</Tag>
         ),
-    },
-    {
-      title: "Điểm danh gần nhất",
-      dataIndex: "lastAttendance",
-      key: "lastAttendance",
-      render: (date: string) =>
-        date ? dayjs(date).format("DD/MM/YYYY") : "Chưa có",
     },
     {
       title: "Thao tác",
@@ -114,15 +96,6 @@ const ClassManagement = () => {
               />
             </Link>
           </Tooltip>
-          {/* <Tooltip title="Chỉnh sửa">
-            <Link to={"#"}>
-              <Button
-                icon={<EditOutlined />}
-                size="small"
-                // onClick={() => handleEditClass(record)}
-              />
-            </Link>
-          </Tooltip> */}
         </Space>
       ),
     },
@@ -130,39 +103,53 @@ const ClassManagement = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header với thống kê nhanh */}
+      {/* Thống kê nhanh */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="text-center">
-          <div className="text-2xl font-bold text-blue-600">
-            {/* {classes.length} */}
-          </div>
-          <div className="text-gray-500">Tổng số lớp</div>
-        </Card>
-        <Card className="text-center">
-          <div className="text-2xl font-bold text-green-600">
-            {/* {classes.filter((c) => c.status === "active").length} */}
-          </div>
-          <div className="text-gray-500">Đang diễn ra</div>
-        </Card>
-        <Card className="text-center">
-          <div className="text-2xl font-bold text-orange-600">
-            {/* {classes.reduce((sum, c) => sum + c.students, 0)} */}
-          </div>
-          <div className="text-gray-500">Tổng học viên</div>
-        </Card>
-        <Card className="text-center">
-          <div className="text-2xl font-bold text-purple-600">
-            {/* {Math.round(
-              classes.reduce((sum, c) => sum + c.attendanceRate, 0) /
-                classes.length
-            )} */}
-            %
-          </div>
-          <div className="text-gray-500">Tỷ lệ tham gia TB</div>
-        </Card>
+        <StatCard
+          value={classes.length}
+          label="Tổng số lớp"
+          color="text-blue-600"
+        />
+        <StatCard
+          value={classes.filter((c: any) => !c.deletedAt).length}
+          label="Đang diễn ra"
+          color="text-green-600"
+        />
+        <StatCard
+          value={classes.reduce((sum: number, c: any) => sum + c.students, 0)}
+          label="Tổng học viên"
+          color="text-orange-600"
+        />
+        <StatCard
+          value={
+            classes.length
+              ? `${Math.round(
+                  classes.reduce(
+                    (sum: number, c: any) => sum + c.attendanceRate,
+                    0
+                  ) / classes.length
+                )}%`
+              : "0%"
+          }
+          label="Tỷ lệ tham gia TB"
+          color="text-purple-600"
+        />
       </div>
 
-      {/* Bảng danh sách lớp học */}
+      {/* Thanh tìm kiếm */}
+      <Card>
+        <div>
+          <label className="block text-sm font-medium mb-1">
+            Tìm kiếm lớp học
+          </label>
+          <Search
+            placeholder="Tìm theo tên hoặc mã lớp học"
+            className="max-w-xs"
+          />
+        </div>
+      </Card>
+
+      {/* Bảng danh sách lớp */}
       <Card title="Danh sách lớp học">
         <Table
           columns={columns}
@@ -170,13 +157,11 @@ const ClassManagement = () => {
           loading={isLoading}
           rowKey="id"
           pagination={{
-            pageSize: 10,
-            showSizeChanger: true,
-            showQuickJumper: true,
+            pageSize: 5,
             showTotal: (total, range) =>
               `${range[0]}-${range[1]} của ${total} lớp học`,
           }}
-          scroll={{ x: 1200 }}
+          scroll={{ x: 1000 }}
         />
       </Card>
     </div>

@@ -1,6 +1,12 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { getListStudent, getListTeacher, User } from "../api/userApi";
+import {
+  blockUser,
+  getAllUser,
+  getListStudent,
+  getListTeacher,
+  User,
+} from "../api/userApi";
 
 export const useTeacherQuery = () => {
   return useQuery<User[]>({
@@ -15,5 +21,26 @@ export const useStudentQuery = () => {
     queryKey: ["User", "Students"],
     queryFn: getListStudent,
     gcTime: 1000 * 60 * 5,
+  });
+};
+
+export const useUserQuery = () => {
+  return useQuery<User[]>({
+    queryKey: ["USER"],
+    queryFn: getAllUser,
+  });
+};
+
+export const useBlockeUser = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      userId,
+      isBlocked,
+    }: {
+      userId: string;
+      isBlocked: boolean;
+    }) => blockUser(userId, isBlocked),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["USER"] }),
   });
 };

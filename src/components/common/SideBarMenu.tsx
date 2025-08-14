@@ -1,4 +1,3 @@
-import logoSrc from "@/assets/logo-square.png";
 import { LogoutOutlined } from "@ant-design/icons";
 import type { MenuProps } from "antd";
 import { Layout, Menu } from "antd";
@@ -28,7 +27,15 @@ const SiderMenu = ({
       collapsed={collapsed}
       onCollapse={setCollapsed}
       width={280}
-      style={{ background: "#fff", boxShadow: "2px 0 8px #f0f1f2" }}
+      style={{
+        background: "#fff",
+        boxShadow: "2px 0 8px #f0f1f2",
+        position: "fixed",
+        top: 0,
+        left: 0,
+        height: "100vh",
+        zIndex: 100,
+      }}
     >
       <div
         style={{

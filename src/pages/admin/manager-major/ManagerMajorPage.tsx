@@ -175,20 +175,19 @@ const ManagerMajorPage = () => {
   );
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
+    <>
+      <h1 className="text-2xl font-bold mb-3">Quản lý ngành học</h1>
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">Quản lý ngành học</h1>
+        <Input.Search
+          placeholder="Tìm kiếm ngành..."
+          onSearch={handleSearch}
+          allowClear
+          className="max-w-sm"
+        />
         <Button type="primary" onClick={() => openModal()}>
           Thêm ngành
         </Button>
       </div>
-
-      <Input.Search
-        placeholder="Tìm kiếm ngành..."
-        onSearch={handleSearch}
-        allowClear
-        className="mb-4 max-w-sm"
-      />
 
       <Table
         dataSource={data?.data || []}
@@ -267,7 +266,7 @@ const ManagerMajorPage = () => {
           </div>
         </form>
       </Modal>
-    </div>
+    </>
   );
 };
 

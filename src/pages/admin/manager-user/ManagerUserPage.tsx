@@ -1,8 +1,6 @@
 import React from "react";
 
-type Props = {};
-
-const ManagerUserPage = (props: Props) => {
+const ManagerUserPage = () => {
   return <div>ManagerUserPage</div>;
 };
 
