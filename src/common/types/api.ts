@@ -1,9 +1,9 @@
 export type Params = {
   [key: string]: any;
   search?: string;
-  page?: number;
+  page?: string | number;
   sort?: string;
-  limit?: number;
+  limit?: string;
   order?: string;
   fields?: string;
 };

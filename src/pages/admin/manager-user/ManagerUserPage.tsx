@@ -1,6 +1,5 @@
-import React from "react";
-
 const ManagerUserPage = () => {
+  const {} = useTable;
   return <div>ManagerUserPage</div>;
 };
 
