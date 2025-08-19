@@ -5,13 +5,11 @@ import {
   ReactNode,
   useState,
 } from "react";
-import {
-  createUser,
-  updateUserRole,
-  User,
-} from "../../../../common/api/userApi";
+import { createUser, updateUserRole } from "../../../../common/api/userApi";
 import { Form, Input, message, Modal, Select } from "antd";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import User from "../../../../common/types/user";
+import MajorSelected from "./MajorSelected";
 
 const { Option } = Select;
 
@@ -141,7 +139,9 @@ const UserForm = ({ children, userEdit }: UserFormProps) => {
                   rules={[
                     { required: true, message: "Vui lòng chọn chuyên ngành" },
                   ]}
-                ></Form.Item>
+                >
+                  <MajorSelected />
+                </Form.Item>
               )}
             </>
           )}

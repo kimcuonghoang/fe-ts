@@ -1,7 +1,7 @@
-import { useMemo } from "react";
-import { useFilter } from "./useFilter";
-import { debounce } from "lodash";
 import { FilterValue, SorterResult } from "antd/es/table/interface";
+import { useFilter } from "./useFilter";
+import { useMemo } from "react";
+import { debounce } from "lodash";
 import { convertObject } from "../utils/convertParamsToObject";
 import { Params } from "../types/api";
 
@@ -12,10 +12,11 @@ export const useTable = <T extends object>() => {
     resetFilterExceptPageAndLimit,
     updateQueryParams,
   } = useFilter();
-
+  // ACTION FILTER
   const getFilteredValue = (key: string) => {
     return query[key] ? (query[key] as string).split(",") : undefined;
   };
+
   const resetFilter = (options?: { keepPageAndLimit?: boolean }) => {
     if (options?.keepPageAndLimit) {
       resetFilterExceptPageAndLimit();
@@ -24,6 +25,7 @@ export const useTable = <T extends object>() => {
     }
   };
 
+  // HANDLE ONCHANGE
   const onChangeSearchInput = useMemo(() => {
     return debounce(
       (text: string, options: { enableOnChangeSearch: boolean }) => {
@@ -58,13 +60,14 @@ export const useTable = <T extends object>() => {
     const sortColumnKey = Array.isArray(sorter)
       ? sorter[0]?.columnKey
       : sorter?.columnKey;
-    const sortOrder = Array.isArray(sorter) ? sorter[0].order : sorter?.order;
+    const sortOrder = Array.isArray(sorter) ? sorter[0]?.order : sorter?.order;
 
     const params: Params = {
       ...query,
-      filterParams,
+      ...filterParams,
       page: "1",
     };
+
     if (sortColumnKey && sortOrder) {
       params.sort = sortColumnKey.toString();
       params.order = sortOrder === "ascend" ? "asc" : "desc";
@@ -72,7 +75,7 @@ export const useTable = <T extends object>() => {
       params.sort = undefined;
       params.order = undefined;
     }
-
+    console.log(params);
     updateQueryParams(params);
   };
 
@@ -97,8 +100,8 @@ export const useTable = <T extends object>() => {
   return {
     query,
     onFilter,
-    getFilteredValue,
     getSorterProps,
+    getFilteredValue,
     resetFilter,
     onSelectPaginateChange,
     onChangeSearchInput,

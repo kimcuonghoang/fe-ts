@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import React from "react";
-import { blockUser, User } from "../../../../common/api/userApi";
+
+import { blockUser } from "../../../../common/api/userApi";
 import {
   Button,
   message,
@@ -24,8 +24,9 @@ import {
 } from "../../../../components/TranslateRole";
 import ModalDetailUser from "./ModalDetailUser";
 import UserForm from "./UserForm";
+import User from "../../../../common/types/user";
 
-const UseColumn = (getSorterProps: (field: string) => object) => {
+const UserColumn = (getSorterProps: (field: string) => object) => {
   const queryClient = useQueryClient();
   const lockMutation = useMutation({
     mutationFn: async (id: string) => await blockUser(id, true),
@@ -164,4 +165,4 @@ const UseColumn = (getSorterProps: (field: string) => object) => {
   ];
 };
 
-export default UseColumn;
+export default UserColumn;

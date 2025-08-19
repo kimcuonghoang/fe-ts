@@ -3,7 +3,7 @@ export type Params = {
   search?: string;
   page?: string | number;
   sort?: string;
-  limit?: string;
+  limit?: string | number;
   order?: string;
   fields?: string;
 };

@@ -1,272 +1,102 @@
-import {
-  DeleteOutlined,
-  EditOutlined,
-  RotateLeftOutlined,
-} from "@ant-design/icons";
-import {
-  Button,
-  Form,
-  Input,
-  message,
-  Modal,
-  Popconfirm,
-  Table,
-  Tag,
-} from "antd";
-import { useState, useMemo } from "react";
-import { Controller, Resolver, useForm } from "react-hook-form";
-import {
-  useCreateMajor,
-  useMajorsQuery,
-  useRestoreMajor,
-  useSoftDeleteMajor,
-  useUpdateMajor,
-} from "../../../common/hooks/useMajorQuery";
+import { useQuery } from "@tanstack/react-query";
+import { Button, Select, Space, Tag } from "antd";
+import { DefaultOptionType } from "antd/es/select";
+import FormMajor from "./components/FormMajor";
+import { majorColumns } from "./components/MajorColumn";
+import { UndoOutlined } from "@ant-design/icons";
+import { useTable } from "../../../common/hooks/useTable";
 import { Major } from "../../../common/types/major";
-import { Params } from "../../../common/types/api";
-import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  createMajorSchema,
-  updateMajorSchema,
-} from "../../../common/validations/majorSchema";
+import { getAllMajors } from "../../../common/api/majorApi";
+import SearchInput from "../../../components/common/SearchInput";
+import TableDisplay from "../../../components/common/TableDisplay";
+
 const ManagerMajorPage = () => {
-  const [params, setParams] = useState<Params>({
-    page: 1,
-    limit: 5,
-  });
-
-  const { data, isLoading } = useMajorsQuery(params);
-  const createMutation = useCreateMajor();
-  const updateMutation = useUpdateMajor();
-  const softDeleteMutation = useSoftDeleteMajor();
-  const restoreMutation = useRestoreMajor();
-
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingMajor, setEditingMajor] = useState<Major | null>(null);
   const {
-    handleSubmit,
-    reset,
-    control,
-    formState: { errors },
-  } = useForm({
-    resolver: zodResolver(
-      editingMajor ? updateMajorSchema : createMajorSchema
-    ) as Resolver<Omit<Major, "_id">>,
+    query,
+    getSorterProps,
+    onFilter,
+    onSelectPaginateChange,
+    onChangeSearchInput,
+    onSubmitSearch,
+    resetFilter,
+  } = useTable<Major>();
+
+  // Query danh sách chuyên ngành
+  const { data, isLoading } = useQuery({
+    queryKey: ["majors", ...Object.values(query)],
+    queryFn: () => getAllMajors({ limit: "5", ...query }),
+    retry: 0,
   });
 
-  const openModal = (major?: Major) => {
-    if (major) {
-      setEditingMajor(major);
-      reset({
-        code: major.code,
-        name: major.name,
-        description: major.description,
-      });
-    } else {
-      setEditingMajor(null);
-      reset({ code: "", name: "", description: "" });
-    }
-    setIsModalOpen(true);
-  };
-
-  const closeModal = () => {
-    setIsModalOpen(false);
-    reset();
-    setEditingMajor(null);
-  };
-
-  const onSubmit = async (formData: Omit<Major, "_id">) => {
-    try {
-      if (editingMajor) {
-        await updateMutation.mutateAsync({
-          id: editingMajor._id,
-          data: formData,
-        });
-      } else {
-        await createMutation.mutateAsync(formData);
-      }
-      closeModal();
-    } catch {
-      message.error("Đã có lỗi xảy ra.");
-    }
-  };
-
-  const handleSearch = (value: string) => {
-    setParams((prev) => ({
-      ...prev,
-      search: value.trim(),
-      page: 1,
-    }));
-  };
-
-  const handleTableChange = (pagination: any, _: any, sorter: any) => {
-    setParams((prev) => ({
-      ...prev,
-      page: pagination.current,
-      limit: pagination.pageSize,
-      sort: sorter.field || undefined,
-      order:
-        sorter.order === "ascend"
-          ? "asc"
-          : sorter.order === "descend"
-          ? "desc"
-          : undefined,
-    }));
-  };
-
-  const columns = useMemo(
-    () => [
-      {
-        title: "Mã ngành",
-        dataIndex: "code",
-        key: "code",
-        sorter: true,
-      },
-      {
-        title: "Tên ngành",
-        dataIndex: "name",
-        key: "name",
-        sorter: true,
-      },
-      {
-        title: "Mô tả",
-        dataIndex: "description",
-        key: "description",
-      },
-      {
-        title: "Trạng thái",
-        dataIndex: "deletedAt",
-        key: "deletedAt",
-
-        render: (deletedAt: string | null) =>
-          deletedAt ? (
-            <Tag color="red">Đã xóa</Tag>
-          ) : (
-            <Tag color="green">Hoạt động</Tag>
-          ),
-      },
-      {
-        title: "Thao tác",
-        key: "actions",
-        render: (_: any, record: Major) => (
-          <div className="space-x-2">
-            <Button type="link" onClick={() => openModal(record)}>
-              <EditOutlined />
-            </Button>
-            {!record.deletedAt ? (
-              <Popconfirm
-                title="Bạn chắc chắn muốn xóa?"
-                onConfirm={() => softDeleteMutation.mutate(record._id)}
-              >
-                <Button type="link" danger icon={<DeleteOutlined />} />
-              </Popconfirm>
-            ) : (
-              <Button
-                type="link"
-                onClick={() => restoreMutation.mutate(record._id)}
-                icon={<RotateLeftOutlined />}
-              />
-            )}
-          </div>
-        ),
-      },
-    ],
-    []
-  );
-
+  const options: DefaultOptionType[] = [
+    { value: "", label: <Tag color="blue">Tất cả</Tag> },
+    { value: "false", label: <Tag color="green">Đang hoạt động</Tag> },
+    { value: "true", label: <Tag color="red">Đã xoá</Tag> },
+  ];
   return (
-    <>
-      <h1 className="text-2xl font-bold mb-3">Quản lý ngành học</h1>
-      <div className="flex justify-between items-center mb-4">
-        <Input.Search
-          placeholder="Tìm kiếm ngành..."
-          onSearch={handleSearch}
-          allowClear
-          className="max-w-sm"
-        />
-        <Button type="primary" onClick={() => openModal()}>
-          Thêm ngành
-        </Button>
-      </div>
-
-      <Table
-        dataSource={data?.data || []}
-        columns={columns}
-        rowKey="_id"
-        loading={isLoading}
-        pagination={{
-          current: params.page,
-          pageSize: params.limit,
-          total: data?.meta.total,
+    <div>
+      <h2 style={{ marginBottom: 16 }}>Quản lý chuyên ngành</h2>
+      <Space
+        style={{
+          marginBottom: 16,
+          display: "flex",
+          justifyContent: "space-between",
         }}
-        onChange={handleTableChange}
-      />
-
-      <Modal
-        open={isModalOpen}
-        onCancel={closeModal}
-        footer={null}
-        title={editingMajor ? "Cập nhật ngành" : "Thêm ngành"}
-        destroyOnClose
       >
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <Form.Item
-            label="Mã ngành"
-            required
-            help={errors.code?.message}
-            validateStatus={errors.code ? "error" : ""}
-          >
-            <Controller
-              name="code"
-              control={control}
-              render={({ field }) => (
-                <Input {...field} placeholder="Nhập mã ngành" />
-              )}
-            />
-          </Form.Item>
-
-          <Form.Item
-            label="Tên ngành"
-            required
-            help={errors.name?.message}
-            validateStatus={errors.name ? "error" : ""}
-          >
-            <Controller
-              name="name"
-              control={control}
-              render={({ field }) => (
-                <Input {...field} placeholder="Nhập tên ngành" />
-              )}
-            />
-          </Form.Item>
-
-          <Form.Item
-            label="Mô tả"
-            help={errors.description?.message}
-            validateStatus={errors.description ? "error" : ""}
-          >
-            <Controller
-              name="description"
-              control={control}
-              render={({ field }) => (
-                <Input.TextArea
-                  {...field}
-                  rows={4}
-                  placeholder="Nhập mô tả ngành"
-                />
-              )}
-            />
-          </Form.Item>
-
-          <div className="flex justify-end gap-2">
-            <Button onClick={closeModal}>Huỷ</Button>
-            <Button type="primary" htmlType="submit">
-              {editingMajor ? "Cập nhật" : "Thêm mới"}
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <SearchInput
+            placeholder="Tìm kiếm theo mã, tên, mô tả..."
+            onSearch={(e) => onSubmitSearch(e)}
+            onChangeSeachInput={(value) =>
+              onChangeSearchInput(value, { enableOnChangeSearch: true })
+            }
+            defaultValue={query?.search}
+            style={{ width: 300 }}
+          />
+          <Select
+            allowClear
+            value={query?.isDeleted}
+            onChange={(value) => onFilter({ isDeleted: value })}
+            placeholder="Trạng thái hoạt động"
+            options={options}
+            style={{
+              width: 150,
+            }}
+          />
+          {Object.keys(query).some(
+            (key) =>
+              !["page", "limit"].includes(key) &&
+              query[key] !== undefined &&
+              query[key] !== ""
+          ) && (
+            <Button onClick={() => resetFilter({ keepPageAndLimit: true })}>
+              <UndoOutlined />
             </Button>
-          </div>
-        </form>
-      </Modal>
-    </>
+          )}
+        </div>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+          }}
+        >
+          <FormMajor>
+            <Button type="primary">Thêm chuyên ngành</Button>
+          </FormMajor>
+        </div>
+      </Space>
+      <TableDisplay<Major>
+        columns={majorColumns(getSorterProps)}
+        dataSource={data?.data}
+        onFilter={onFilter}
+        currentPage={data?.meta.page || 1}
+        totalDocs={data?.meta.total}
+        isLoading={isLoading}
+        pageSize={data?.meta.limit}
+        onSelectPaginateChange={onSelectPaginateChange}
+      />
+    </div>
   );
 };
 

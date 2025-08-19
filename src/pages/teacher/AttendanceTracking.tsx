@@ -14,8 +14,6 @@ import {
 } from "antd";
 import { UserOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
-import { useClassQuery } from "../../common/hooks/useClassQuery";
-import { useStudentQuery } from "../../common/hooks/useUserQuery";
 
 const { Option } = Select;
 const { Search } = Input;
@@ -24,9 +22,6 @@ const AttendanceTracking = () => {
   const [selectedClass, setSelectedClass] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState(dayjs());
   const [searchText, setSearchText] = useState("");
-
-  const { data: classes = [], isLoading: loadingClasses } = useClassQuery();
-  const { data: students = [], isLoading: loadingStudents } = useStudentQuery();
 
   const filteredStudents = useMemo(() => {
     return students.filter((s) =>

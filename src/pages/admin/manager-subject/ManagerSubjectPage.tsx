@@ -1,270 +1,108 @@
-import {
-  DeleteOutlined,
-  EditOutlined,
-  RotateLeftOutlined,
-} from "@ant-design/icons";
-import {
-  Button,
-  Form,
-  Input,
-  message,
-  Modal,
-  Popconfirm,
-  Table,
-  Tag,
-} from "antd";
-import { useMemo, useState } from "react";
-import { Controller, Resolver, useForm } from "react-hook-form";
-
-import {
-  useCreateSubject,
-  useRestoreSubject,
-  useSoftDeleteSubject,
-  useSubjectsQuery,
-  useUpdateSubject,
-} from "../../../common/hooks/useSubjectQuery";
+import { useQuery } from "@tanstack/react-query";
+import { Button, Space, Tag } from "antd";
+import { DefaultOptionType } from "antd/es/select";
+import { Select } from "antd/lib";
+import FormSubject from "./components/FormSubject";
+import { subjectColumns } from "./components/SubjectColumn";
+import { UndoOutlined } from "@ant-design/icons";
 import { Subject } from "../../../common/types/subject";
-import { Params } from "../../../common/types/api";
-import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  createSubjectSchema,
-  updateSubjectSchema,
-} from "../../../common/validations/subjectSchema";
+import { getAllSubjects } from "../../../common/api/subjectApi";
+import { useTable } from "../../../common/hooks/useTable";
+import TableDisplay from "../../../components/common/TableDisplay";
+import SearchInput from "../../../components/common/SearchInput";
 
-const ManagerSubjectPage = () => {
-  const [params, setParams] = useState<Params>({
-    page: 1,
-    limit: 5,
-  });
-  const { data, isLoading } = useSubjectsQuery(params);
-  const createMutation = useCreateSubject();
-  const updateMutation = useUpdateSubject();
-  const softDeleteMutation = useSoftDeleteSubject();
-  const restoreMutation = useRestoreSubject();
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingSubject, setEditingSubject] = useState<Subject | null>(null);
+const Managram = () => {
   const {
-    handleSubmit,
-    reset,
-    control,
-    formState: { errors },
-  } = useForm({
-    resolver: zodResolver(
-      editingSubject ? createSubjectSchema : updateSubjectSchema
-    ) as Resolver<Omit<Subject, "_id" | "code">>,
+    query,
+    onFilter,
+    onChangeSearchInput,
+    onSubmitSearch,
+    getSorterProps,
+    onSelectPaginateChange,
+    resetFilter,
+  } = useTable<Subject>();
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["subjects", ...Object.values(query)],
+    queryFn: () => getAllSubjects({ limit: "5", ...query }),
   });
-  const openModal = (subject?: Subject) => {
-    if (subject) {
-      setEditingSubject(subject);
-      reset({
-        name: subject.name,
-        englishName: subject.englishName,
-        description: subject.description,
-      });
-    } else {
-      setEditingSubject(null);
-      reset({
-        name: "",
-        description: "",
-        englishName: "",
-      });
-    }
-    setIsModalOpen(true);
-  };
 
-  const closeModal = () => {
-    setIsModalOpen(false);
-    reset();
-    setEditingSubject(null);
-  };
+  const subjects = data?.data;
+  const pagination = data?.meta;
 
-  const onSubmit = async (data: Omit<Subject, "_id">) => {
-    try {
-      if (editingSubject) {
-        await updateMutation.mutateAsync({ id: editingSubject._id, data });
-      } else {
-        await createMutation.mutateAsync(data);
-      }
-      closeModal();
-    } catch {
-      message.error("Đã có lỗi xảy ra.");
-    }
-  };
-  const handleSearch = (value: string) => {
-    setParams((prev) => ({
-      ...prev,
-      search: value.trim(),
-      page: 1,
-    }));
-  };
-  const handleTableChange = (pagination: any, _: any, sorter: any) => {
-    setParams((prev) => ({
-      ...prev,
-      page: pagination.current,
-      limit: pagination.pageSize,
-      sort: sorter.field || undefined,
-      order:
-        sorter.order === "ascend"
-          ? "asc"
-          : sorter.order === "descend"
-          ? "desc"
-          : undefined,
-    }));
-  };
-  const columns = useMemo(
-    () => [
-      {
-        title: "Tên môn",
-        dataIndex: "name",
-        key: "name",
-        sorter: true,
-      },
-      {
-        title: "englishName",
-        dataIndex: "englishName",
-        key: "englishName",
-      },
-      {
-        title: "Mã môn",
-        dataIndex: "code",
-        key: "code",
-      },
-      {
-        title: "Mô tả",
-        dataIndex: "description",
-        key: "description",
-      },
-      {
-        title: "Trạng thái",
-        dataIndex: "deletedAt",
-        key: "deletedAt",
-        width: 120,
-        render: (deletedAt: string | null) =>
-          deletedAt ? (
-            <Tag color="red">Đã xóa</Tag>
-          ) : (
-            <Tag color="green">Hoạt động</Tag>
-          ),
-      },
-      {
-        title: "Thao tác",
-        key: "actions",
-        render: (_: any, record: Subject) => (
-          <div className="space-x-2">
-            <Button type="link" onClick={() => openModal(record)}>
-              <EditOutlined />
-            </Button>
-            {!record.deletedAt ? (
-              <Popconfirm
-                title="Bạn chắc chắn muốn xóa?"
-                onConfirm={() => softDeleteMutation.mutate(record._id)}
-              >
-                <Button type="link" danger icon={<DeleteOutlined />}></Button>
-              </Popconfirm>
-            ) : (
-              <Button
-                type="link"
-                onClick={() => restoreMutation.mutate(record._id)}
-                icon={<RotateLeftOutlined />}
-              ></Button>
-            )}
-          </div>
-        ),
-      },
-    ],
-    []
-  );
-
+  const options: DefaultOptionType[] = [
+    { value: "", label: <Tag color="blue">Tất cả</Tag> },
+    { value: "false", label: <Tag color="green">Đang hoạt động</Tag> },
+    { value: "true", label: <Tag color="red">Đã xoá</Tag> },
+  ];
   return (
-    <>
-      <h1 className="text-2xl font-bold mb-3">Quản lý môn học</h1>
-      <div className="flex justify-between items-center mb-4 ">
-        <Input.Search
-          placeholder="Tìm kiếm ngành..."
-          onSearch={handleSearch}
-          allowClear
-          className="max-w-sm"
-        />
-        <Button type="primary" onClick={() => openModal()}>
-          Thêm môn
-        </Button>
-      </div>
-
-      <Table
-        dataSource={data?.data || []}
-        columns={columns}
-        rowKey="_id"
-        loading={isLoading}
-        pagination={{
-          current: params.page,
-          pageSize: params.limit,
-          total: data?.meta.total,
+    <div>
+      <h2 style={{ marginBottom: 16 }}>Quản lý môn học</h2>
+      <Space
+        style={{
+          marginBottom: 16,
+          display: "flex",
+          justifyContent: "space-between",
         }}
-        onChange={handleTableChange}
-      />
-
-      <Modal
-        open={isModalOpen}
-        onCancel={closeModal}
-        footer={null}
-        title={editingSubject ? "Cập nhật môn" : "Thêm môn"}
-        destroyOnClose
       >
-        <Form onFinish={handleSubmit(onSubmit)} className="space-y-4">
-          <Form.Item
-            label="Tên môn"
-            required
-            help={errors.name?.message}
-            validateStatus={errors.name ? "error" : ""}
-          >
-            <Controller
-              name="name"
-              control={control}
-              rules={{ required: true }}
-              render={({ field }) => (
-                <Input {...field} placeholder="Nhập tên môn" />
-              )}
-            />
-          </Form.Item>
-          <Form.Item
-            label="English Name"
-            required
-            help={errors.englishName?.message}
-            validateStatus={errors.englishName ? "error" : ""}
-          >
-            <Controller
-              name="englishName"
-              control={control}
-              rules={{ required: true }}
-              render={({ field }) => (
-                <Input {...field} placeholder="Nhập mã môn" />
-              )}
-            />
-          </Form.Item>
-          <Form.Item
-            label="Mô tả"
-            required
-            help={errors.description?.message}
-            validateStatus={errors.description ? "error" : ""}
-          >
-            <Controller
-              name="description"
-              control={control}
-              render={({ field }) => (
-                <Input.TextArea {...field} placeholder="Nhập mô tả" rows={4} />
-              )}
-            />
-          </Form.Item>
-          <div className="flex justify-end gap-2">
-            <Button onClick={closeModal}>Huỷ</Button>
-            <Button type="primary" htmlType="submit">
-              {editingSubject ? "Cập nhật" : "Thêm mới"}
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <SearchInput
+            defaultValue={query.search}
+            onSearch={(value) => onSubmitSearch(value)}
+            onChangeSeachInput={(value) =>
+              onChangeSearchInput(value, { enableOnChangeSearch: true })
+            }
+            placeholder="Tìm kiếm theo mã, tên, mô tả..."
+            style={{
+              width: 300,
+            }}
+          />
+          <Select
+            allowClear
+            value={query?.isDeleted}
+            onChange={(value) => onFilter({ isDeleted: value })}
+            placeholder="Trạng thái hoạt động"
+            options={options}
+            style={{
+              width: 150,
+            }}
+          />
+          {Object.keys(query).some(
+            (key) =>
+              !["page", "limit"].includes(key) &&
+              query[key] !== undefined &&
+              query[key] !== ""
+          ) && (
+            <Button onClick={() => resetFilter({ keepPageAndLimit: true })}>
+              <UndoOutlined />
             </Button>
-          </div>
-        </Form>
-      </Modal>
-    </>
+          )}
+        </div>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+          }}
+        >
+          <FormSubject>
+            <Button type="primary">Thêm môn học</Button>
+          </FormSubject>
+        </div>
+      </Space>
+
+      <TableDisplay<Subject>
+        columns={subjectColumns(getSorterProps)}
+        dataSource={subjects}
+        isLoading={isLoading}
+        currentPage={pagination?.page || 1}
+        onFilter={onFilter}
+        totalDocs={pagination?.total}
+        pageSize={pagination?.limit}
+        onSelectPaginateChange={onSelectPaginateChange}
+      />
+    </div>
   );
 };
 
-export default ManagerSubjectPage;
+export default Managram;

@@ -19,12 +19,12 @@ const teacherRoutes: RouteObject[] = [
     ),
     children: [
       { path: "dashboard", element: <Dashboard /> },
-      { path: "attendance", element: <AttendanceTracking /> },
-      { path: "reports", element: <DetailedReports /> },
-      {
-        path: "classes",
-        element: <ManagerClassPage />,
-      },
+      // { path: "attendance", element: <AttendanceTracking /> },
+      // { path: "reports", element: <DetailedReports /> },
+      // {
+      //   path: "classes",
+      //   element: <ManagerClassPage />,
+      // },
       {
         path: "sessions",
         element: <ManagerSessionPage />,

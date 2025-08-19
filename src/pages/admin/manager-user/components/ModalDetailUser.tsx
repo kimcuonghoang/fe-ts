@@ -5,11 +5,12 @@ import {
   ReactNode,
   useState,
 } from "react";
-import { User } from "../../../../common/api/userApi";
+
 import { Button, Descriptions, DescriptionsProps, Modal, Tag } from "antd";
 import { TextCell } from "../../../../components/common/TextCell";
 import { formatDateLocaleVN } from "../../../../common/utils/formatDate";
 import { translateRoles } from "../../../../components/TranslateRole";
+import User from "../../../../common/types/user";
 
 const ModalDetailUser = ({
   children,

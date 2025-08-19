@@ -17,22 +17,22 @@ const adminMenu = [
   {
     key: "/admin/users",
     icon: <TeamOutlined />,
-    label: <Link to="/admin/users">Quản lý người dùng</Link>,
+    label: <Link to="/admin/users?page=1&limit=5">Quản lý người dùng</Link>,
   },
   {
     key: "/admin/majors",
     icon: <ApartmentOutlined />,
-    label: <Link to="/admin/majors">Quản lý chuyên ngành</Link>,
+    label: <Link to="/admin/majors?page=1&limit=5">Quản lý chuyên ngành</Link>,
   },
   {
     key: "/admin/subjects",
     icon: <BookOutlined />,
-    label: <Link to="/admin/subjects">Quản lý môn học</Link>,
+    label: <Link to="/admin/subjects?page=1&limit=5">Quản lý môn học</Link>,
   },
   {
     key: "/admin/classes",
     icon: <UserOutlined />,
-    label: <Link to="/admin/classes">Quản lý lớp học</Link>,
+    label: <Link to="/admin/classes?page=1&limit=5">Quản lý lớp học</Link>,
   },
 ];
 

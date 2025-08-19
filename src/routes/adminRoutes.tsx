@@ -13,7 +13,7 @@ const adminRoutes: RouteObject[] = [
     path: "/admin",
     element: (
       <ProtectedRoute allowedRoles={[RoleEnum.SUPER_ADMIN]}>
-        <AdminLayout />
+        <AdminLayout collapsed={false} />
       </ProtectedRoute>
     ),
     children: [
