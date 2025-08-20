@@ -14,6 +14,8 @@ import {
 } from "antd";
 import { UserOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
+import { useQuery } from "@tanstack/react-query";
+import { getAllClass } from "../../common/api/classApi";
 
 const { Option } = Select;
 const { Search } = Input;
@@ -22,15 +24,12 @@ const AttendanceTracking = () => {
   const [selectedClass, setSelectedClass] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState(dayjs());
   const [searchText, setSearchText] = useState("");
-
-  const filteredStudents = useMemo(() => {
-    return students.filter((s) =>
-      searchText
-        ? s.fullname.toLowerCase().includes(searchText.toLowerCase()) ||
-          s.studentId.toLowerCase().includes(searchText.toLowerCase())
-        : true
-    );
-  }, [students, searchText]);
+  const user: any = JSON.parse(localStorage.getItem("user") || "null");
+  const { data } = useQuery({
+    queryKey: ["CLASS_STUDENTS"],
+    queryFn: () => getAllClass({ studentId: user._id }),
+  });
+  const students = data?.data;
 
   const handleSubmit = () => {
     console.log("Submit checked attendance");
@@ -50,73 +49,7 @@ const AttendanceTracking = () => {
         </div>
       ),
     },
-    {
-      title: "Tỷ lệ tham gia",
-      key: "attendanceRate",
-      render: (_: any, record: any) => (
-        <div>
-          <div className="font-medium">{record.attendanceRate}%</div>
-          <Progress
-            percent={record.attendanceRate}
-            size="small"
-            strokeColor={
-              record.attendanceRate >= 90
-                ? "#52c41a"
-                : record.attendanceRate >= 80
-                ? "#faad14"
-                : "#ff4d4f"
-            }
-          />
-        </div>
-      ),
-    },
-    {
-      title: "Thống kê",
-      key: "stats",
-      render: (_: any, record: any) => (
-        <div className="text-sm">
-          <div className="flex justify-between">
-            <span>Có mặt:</span>
-            <span className="text-green-600 font-medium">
-              {record.presentSessions}
-            </span>
-          </div>
-          <div className="flex justify-between">
-            <span>Vắng:</span>
-            <span className="text-red-600 font-medium">
-              {record.absentSessions}
-            </span>
-          </div>
-        </div>
-      ),
-    },
-    {
-      title: "Trạng thái hôm nay",
-      key: "todayStatus",
-      render: (_: any, record: any) => (
-        <Switch
-          checked={record.status}
-          onChange={(checked) => {
-            console.log(`Học viên ${record.fullname} trạng thái:`, checked);
-          }}
-        />
-      ),
-    },
-    {
-      title: "Lần cuối tham gia",
-      dataIndex: "lastAttendance",
-      key: "lastAttendance",
-      render: (date: string) => (date ? dayjs(date).format("DD/MM/YYYY") : "-"),
-    },
   ];
-
-  if (loadingClasses || loadingStudents) {
-    return (
-      <div className="flex justify-center py-10">
-        <Spin tip="Đang tải dữ liệu..." />
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">
@@ -168,17 +101,17 @@ const AttendanceTracking = () => {
       {/* Bảng danh sách học viên */}
       <Card
         title={`Danh sách học viên - ${
-          classes.find((c: any) => c.id === selectedClass)?.name || "Tất cả"
+          students.find((c: any) => c.id === selectedClass)?.name || "Tất cả"
         }`}
         extra={
-          <Badge count={filteredStudents.length} showZero>
+          <Badge count={students.length} showZero>
             <UserOutlined className="text-lg" />
           </Badge>
         }
       >
         <Table
           columns={columns}
-          dataSource={filteredStudents}
+          dataSource={students}
           rowKey="id"
           pagination={{
             showTotal: (total, range) =>

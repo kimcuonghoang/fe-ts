@@ -30,11 +30,6 @@ const SiderMenu = ({
       style={{
         background: "#fff",
         boxShadow: "2px 0 8px #f0f1f2",
-        position: "fixed",
-        top: 0,
-        left: 0,
-        height: "100vh",
-        zIndex: 100,
       }}
     >
       <div

@@ -25,7 +25,7 @@ export const TextCell = ({
     <p
       ref={textRef}
       style={{ margin: 0, ...style }}
-      className={`line-clamp line-clamp-${clamp}`}
+      className={` line-clamp-1 break-all`}
     >
       {text}
     </p>

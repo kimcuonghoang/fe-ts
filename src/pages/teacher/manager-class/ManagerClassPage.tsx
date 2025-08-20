@@ -1,37 +1,32 @@
 import { Card, Table, Button, Tag, Space, Tooltip, Progress } from "antd";
 import {
-  UserOutlined,
   CalendarOutlined,
   ClockCircleOutlined,
   CheckCircleOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
 import { Link } from "react-router-dom";
-import { useClassQuery } from "../../../common/hooks/useClassQuery";
-import Search from "antd/es/input/Search";
+import { useQuery } from "@tanstack/react-query";
+import { getAllClass } from "../../../common/api/classApi";
 
-const StatCard = ({
-  value,
-  label,
-  color,
-}: {
-  value: any;
-  label: string;
-  color: string;
-}) => (
-  <Card className="text-center">
-    <div className={`text-2xl font-bold ${color}`}>{value}</div>
-    <div className="text-gray-500">{label}</div>
-  </Card>
-);
-
-const ClassManagement = () => {
-  const { data: classes = [], isLoading } = useClassQuery();
-
+const MângerClassPage = () => {
+  const user: any = JSON.parse(localStorage.getItem("user") || "null");
+  const { data, isLoading } = useQuery({
+    queryKey: ["CLASS_TEACHER"],
+    queryFn: () => getAllClass({ teacherId: user._id }),
+  });
+  const classes = data?.data;
   const columns = [
     {
       title: "Tên lớp",
       dataIndex: "name",
       key: "name",
+    },
+    {
+      title: "Môn học",
+      key: "subjectId",
+      render: (_: any, record: any) =>
+        record.subjectId?.name || "Chưa cập nhật",
     },
     {
       title: "Lịch học",
@@ -85,10 +80,10 @@ const ClassManagement = () => {
     {
       title: "Thao tác",
       key: "actions",
-      render: () => (
+      render: (_: any, record: any) => (
         <Space>
           <Tooltip title="Điểm danh">
-            <Link to={"/teachers/attendance"}>
+            <Link to={`/teachers/sessions/${record._id}`}>
               <Button
                 type="primary"
                 icon={<CheckCircleOutlined />}
@@ -103,59 +98,13 @@ const ClassManagement = () => {
 
   return (
     <div className="space-y-6">
-      {/* Thống kê nhanh */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <StatCard
-          value={classes.length}
-          label="Tổng số lớp"
-          color="text-blue-600"
-        />
-        <StatCard
-          value={classes.filter((c: any) => !c.deletedAt).length}
-          label="Đang diễn ra"
-          color="text-green-600"
-        />
-        <StatCard
-          value={classes.reduce((sum: number, c: any) => sum + c.students, 0)}
-          label="Tổng học viên"
-          color="text-orange-600"
-        />
-        <StatCard
-          value={
-            classes.length
-              ? `${Math.round(
-                  classes.reduce(
-                    (sum: number, c: any) => sum + c.attendanceRate,
-                    0
-                  ) / classes.length
-                )}%`
-              : "0%"
-          }
-          label="Tỷ lệ tham gia TB"
-          color="text-purple-600"
-        />
-      </div>
-
-      {/* Thanh tìm kiếm */}
-      <Card>
-        <div>
-          <label className="block text-sm font-medium mb-1">
-            Tìm kiếm lớp học
-          </label>
-          <Search
-            placeholder="Tìm theo tên hoặc mã lớp học"
-            className="max-w-xs"
-          />
-        </div>
-      </Card>
-
-      {/* Bảng danh sách lớp */}
-      <Card title="Danh sách lớp học">
+      {/* Danh sách lớp giáo viên */}
+      <Card title="Danh sách lớp của tôi">
         <Table
           columns={columns}
           dataSource={classes}
           loading={isLoading}
-          rowKey="id"
+          rowKey="_id"
           pagination={{
             pageSize: 5,
             showTotal: (total, range) =>
@@ -168,4 +117,4 @@ const ClassManagement = () => {
   );
 };
 
-export default ClassManagement;
+export default MângerClassPage;

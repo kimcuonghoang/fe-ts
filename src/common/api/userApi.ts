@@ -6,7 +6,6 @@ export const getAllUser = async (
   params?: Params
 ): Promise<IResponse<User[]>> => {
   const res = await api.get("/users", { params });
-  console.log(res);
   return res.data;
 };
 

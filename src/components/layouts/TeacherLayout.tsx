@@ -57,10 +57,8 @@ const getBreadcrumb = (pathname: string) => {
   ];
   return crumbs;
 };
-interface TeacherLayoutProps {
-  collapsed: boolean;
-}
-const AdminLayout = ({ collapsed }: TeacherLayoutProps) => {
+
+const AdminLayout = () => {
   const location = useLocation();
   const {
     token: { colorBgContainer },
@@ -81,7 +79,6 @@ const AdminLayout = ({ collapsed }: TeacherLayoutProps) => {
   return (
     <Layout
       style={{
-        marginLeft: collapsed ? 80 : 280,
         transition: "margin-left 0.3s",
       }}
     >

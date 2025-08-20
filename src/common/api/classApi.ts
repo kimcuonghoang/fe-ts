@@ -1,43 +1,43 @@
+import { IResponse, Params } from "../types/api";
+import { Class } from "../types/class";
 import api from "./index";
 
-export type Class = {
-  _id: string;
-  subjectId: string;
-  majorId: string;
-  name: string;
-  teacherId: string;
-  studentIds: string;
-  startDate: Date;
-  totalSessions: number;
-  shift: string;
-  deletedAt?: Date | null;
-};
+export const getAllClass = async (
+  params?: Params
+): Promise<IResponse<Class[]>> => {
+  const res = await api.get("/classes", { params });
 
-export const getClass = async (): Promise<Class[]> => {
-  const res = await api.get("/classes");
+  return res.data;
+};
+export const getClassById = async (id: string): Promise<Class[]> => {
+  const res = await api.get(`/classes/${id}`);
   return res.data.data;
 };
-
-export const createClass = async (data: Omit<Class, "_id">) => {
-  const res = await api.post("/classes", data);
+export const createClass = async (
+  payload: Omit<Class, "_id" | "deletedAt" | "createdAt" | "updatedAt">
+): Promise<Class> => {
+  const res = await api.post("/classes", payload);
   return res.data;
 };
 
-export const updateClass = async (id: string, data: Omit<Class, "_id">) => {
-  const res = await api.patch(`/classes/${id}`, data);
+export const updateClass = async (
+  id: string,
+  payload: Partial<Omit<Class, "_id" | "deletedAt" | "createdAt" | "updatedAt">>
+): Promise<Class> => {
+  const res = await api.patch(`/classes/${id}`, payload);
   return res.data;
 };
 
-export const deleteClass = async (id: string) => {
-  const res = await api.delete(`/classes/${id}`);
-  return res.data;
-};
-
-export const softDelteClass = async (id: string) => {
+export const softDelteClass = async (id: string): Promise<Class> => {
   const res = await api.patch(`/classes/soft-delete/${id}`);
   return res.data;
 };
-export const restoreClass = async (id: string) => {
+export const restoreClass = async (id: string): Promise<Class> => {
   const res = await api.patch(`/classes/restore/${id}`);
   return res.data;
 };
+
+// export const deleteClass = async (id: string) => {
+//   const res = await api.delete(`/classes/${id}`);
+//   return res.data;
+// };
