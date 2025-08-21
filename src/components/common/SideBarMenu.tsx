@@ -3,7 +3,7 @@ import type { MenuProps } from "antd";
 import { Layout, Menu } from "antd";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-
+import logoSrc from "../../assets/logo.png";
 const { Sider } = Layout;
 
 interface SiderMenuProps {
@@ -46,8 +46,7 @@ const SiderMenu = ({
         }}
       >
         <img
-          //   src={logoSrc || "/assets/logo-square.png"}
-          src={"https://picsum.photos/200/300"}
+          src={logoSrc || "/assets/logo-square.png"}
           alt="CodeFarm Logo"
           style={{ height: 64, marginRight: collapsed ? 0 : 12 }}
         />

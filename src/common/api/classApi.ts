@@ -36,7 +36,10 @@ export const restoreClass = async (id: string): Promise<Class> => {
   const res = await api.patch(`/classes/restore/${id}`);
   return res.data;
 };
-
+export const getStudentsByClassId = async (classId: string) => {
+  const res = await api.get(`/classes/${classId}/students`);
+  return res.data.data;
+};
 // export const deleteClass = async (id: string) => {
 //   const res = await api.delete(`/classes/${id}`);
 //   return res.data;

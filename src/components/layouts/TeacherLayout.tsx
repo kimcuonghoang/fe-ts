@@ -85,7 +85,7 @@ const AdminLayout = () => {
       <SiderMenu
         menuItems={adminMenu}
         selectedKeys={selectedKeys}
-        logoText="CodeFarm Teacher"
+        // logoText="CodeFarm Teacher"
       />
       <Layout>
         <HeaderBar />

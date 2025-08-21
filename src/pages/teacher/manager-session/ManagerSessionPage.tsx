@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Card, Table, Button, Space, DatePicker, Select } from "antd";
+import { Card, Table, Space, DatePicker, Select } from "antd";
 import dayjs from "dayjs";
 import { useQuery } from "@tanstack/react-query";
 import { getAllSessionByClassId } from "../../../common/api/sessionApi";
@@ -10,8 +10,9 @@ const ManagerSessionPage = () => {
   const [selectedDate, setSelectedDate] = useState(dayjs());
   const [selectedClass, setSelectedClass] = useState<string | null>(null);
   const { data, isLoading } = useQuery({
-    queryKey: ["SESSIONS"],
-    queryFn: () => getAllSessionByClassId(classId),
+    queryKey: ["SESSIONS", classId],
+    queryFn: () => getAllSessionByClassId(classId!),
+    enabled: !!classId,
   });
   const sessions = data?.data;
   const columns = [
@@ -40,7 +41,7 @@ const ManagerSessionPage = () => {
       key: "actions",
       render: (_: any, record: any) => (
         <Space>
-          <Link to={`/teachers/attendance`}>Điểm danh</Link>
+          <Link to={`/teachers/attendance/${record._id}`}>Điểm danh</Link>
         </Space>
       ),
     },
