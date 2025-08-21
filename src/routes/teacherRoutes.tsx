@@ -5,7 +5,7 @@ import ManagerSessionPage from "../pages/teacher/manager-session/ManagerSessionP
 import TeacherLayout from "../components/layouts/TeacherLayout";
 import ProtectedRoute from "./ProtectedRoute";
 import { RoleEnum } from "../common/types";
-import AttendanceTracking from "../pages/teacher/AttendanceTracking";
+import AttendanceTracking from "../pages/teacher/manager-attendance/AttendanceTracking";
 import DetailedReports from "../pages/teacher/DetailedReports";
 import Dashboard from "../pages/teacher/DashBoard";
 import DetailSessionPage from "../pages/teacher/manager-session/DetailSessionPage";

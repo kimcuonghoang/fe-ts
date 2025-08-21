@@ -8,6 +8,7 @@ import {
   BookOutlined,
   ApartmentOutlined,
   TeamOutlined,
+  RollbackOutlined,
 } from "@ant-design/icons";
 import { Link } from "react-router-dom";
 import SiderMenu from "../common/SideBarMenu";
@@ -34,6 +35,11 @@ const adminMenu = [
     icon: <UserOutlined />,
     label: <Link to="/admin/classes?page=1&limit=5">Quản lý lớp học</Link>,
   },
+  {
+    key: "/",
+    icon: <RollbackOutlined />,
+    label: <Link to="/">Trở về trang chủ</Link>,
+  },
 ];
 
 const getBreadcrumb = (pathname: string) => {
@@ -42,6 +48,7 @@ const getBreadcrumb = (pathname: string) => {
     "/admin/majors": "Chuyên ngành",
     "/admin/subjects": "Môn học",
     "/admin/classes": "Lớp học",
+    "/": "Trở về trang chủ",
   };
   const paths = pathname.split("/").filter(Boolean);
   const crumbs = [

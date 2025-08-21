@@ -34,7 +34,6 @@ const LoginPage = () => {
         localStorage.setItem("user", JSON.stringify(user));
         setAccessToken(accessToken);
         setRefreshToken(refreshToken);
-        console.log("Login success:", res);
         message.success("Đăng nhập thành công!");
         nav("/");
       },

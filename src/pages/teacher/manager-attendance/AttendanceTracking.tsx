@@ -3,7 +3,6 @@ import { useEffect, useMemo, useState } from "react";
 import {
   Card,
   Table,
-  Checkbox,
   Button,
   Space,
   Typography,
@@ -20,9 +19,9 @@ import {
   createAttendance,
   getAttendances,
   updateAttendance,
-} from "../../common/api/attendanceApi";
-import { getAllSessionByClassId } from "../../common/api/sessionApi";
-import { getStudentsByClassId } from "../../common/api/classApi";
+} from "../../../common/api/attendanceApi";
+import { getAllSessionByClassId } from "../../../common/api/sessionApi";
+import { getStudentsByClassId } from "../../../common/api/classApi";
 import TextArea from "antd/es/input/TextArea";
 
 type RowItem = {

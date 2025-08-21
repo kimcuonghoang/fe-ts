@@ -1,8 +1,7 @@
-import { LogoutOutlined } from "@ant-design/icons";
 import type { MenuProps } from "antd";
 import { Layout, Menu } from "antd";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+
 import logoSrc from "../../assets/logo.png";
 const { Sider } = Layout;
 
@@ -17,7 +16,6 @@ const SiderMenu = ({
   menuItems,
   selectedKeys,
   logoText = "CodeFarm",
-  logoutPath = "/login",
 }: SiderMenuProps) => {
   const [collapsed, setCollapsed] = useState(false);
 
@@ -50,7 +48,7 @@ const SiderMenu = ({
           alt="CodeFarm Logo"
           style={{ height: 64, marginRight: collapsed ? 0 : 12 }}
         />
-        {!collapsed && logoText}
+        {!collapsed && <span style={{ color: "#000080" }}>{logoText}</span>}
       </div>
 
       {/* Menu */}
@@ -76,32 +74,7 @@ const SiderMenu = ({
           textAlign: "center",
           padding: "8px 0",
         }}
-      >
-        <Link
-          to={logoutPath}
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            fontSize: 16,
-            fontWeight: 600,
-            color: "var(--primary-color)",
-            padding: "8px 16px",
-            borderRadius: 4,
-            transition: "background-color 0.3s",
-          }}
-          onMouseEnter={(e) =>
-            (e.currentTarget.style.backgroundColor = "#e6f7ff")
-          }
-          onMouseLeave={(e) =>
-            (e.currentTarget.style.backgroundColor = "transparent")
-          }
-        >
-          <LogoutOutlined
-            style={{ fontSize: 18, marginRight: collapsed ? 0 : 8 }}
-          />
-          {!collapsed && "Đăng xuất"}
-        </Link>
-      </div>
+      ></div>
     </Sider>
   );
 };

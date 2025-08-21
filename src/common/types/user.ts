@@ -13,6 +13,7 @@ export default interface User {
   fullName: string;
   studentId: string;
   role: RoleEnum;
+  avatarUrl?: string;
   phone?: string;
   isBlocked: boolean;
   deletedAt: Date | null;

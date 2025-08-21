@@ -7,6 +7,7 @@ import {
   BarChartOutlined,
   CheckCircleOutlined,
   DashboardOutlined,
+  RollbackOutlined,
   TeamOutlined,
 } from "@ant-design/icons";
 import { Link } from "react-router-dom";
@@ -34,6 +35,11 @@ const adminMenu = [
     icon: <BarChartOutlined />,
     label: <Link to="/teachers/reports">Báo cáo chi tiết</Link>,
   },
+  {
+    key: "/",
+    icon: <RollbackOutlined />,
+    label: <Link to="/">Trở về trang chủ</Link>,
+  },
 ];
 
 const getBreadcrumb = (pathname: string) => {
@@ -42,6 +48,7 @@ const getBreadcrumb = (pathname: string) => {
     "/teachers/classes": "Quản lý lớp học",
     "/teachers/attendance": "Điểm danh & Theo dõi",
     "/teachers/reports": "Báo cáo chi tiết",
+    "/": "Trở về trang chủ",
   };
   const paths = pathname.split("/").filter(Boolean);
   const crumbs = [

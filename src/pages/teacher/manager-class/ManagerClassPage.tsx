@@ -47,25 +47,30 @@ const MângerClassPage = () => {
     {
       title: "Sĩ số",
       key: "students",
-      render: (_: any, record: any) => (
-        <>
-          <div className="flex items-center">
-            <UserOutlined className="mr-1 text-green-500" />
-            <span className="font-medium">
-              {record.students}/{record.maxStudents}
-            </span>
-          </div>
-          <Progress
-            percent={Math.round((record.students / record.maxStudents) * 100)}
-            size="small"
-            className="mt-1"
-            strokeColor={
-              record.students >= record.maxStudents ? "#ff4d4f" : "#52c41a"
-            }
-          />
-        </>
-      ),
+      render: (_: any, record: any) => {
+        const current = record.studentIds?.length || 0;
+        const max = record.maxStudents || 0;
+        const percent = max > 0 ? Math.round((current / max) * 100) : 0;
+
+        return (
+          <>
+            <div className="flex items-center">
+              <UserOutlined className="mr-1 text-green-500" />
+              <span className="font-medium">
+                {current}/{max}
+              </span>
+            </div>
+            <Progress
+              percent={percent}
+              size="small"
+              className="mt-1"
+              strokeColor={current >= max ? "#ff4d4f" : "#52c41a"}
+            />
+          </>
+        );
+      },
     },
+
     {
       title: "Trạng thái",
       dataIndex: "deletedAt",
