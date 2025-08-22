@@ -9,6 +9,7 @@ import AttendanceTracking from "../pages/teacher/manager-attendance/AttendanceTr
 import DetailedReports from "../pages/teacher/DetailedReports";
 import Dashboard from "../pages/teacher/DashBoard";
 import DetailSessionPage from "../pages/teacher/manager-session/DetailSessionPage";
+import AttendanceHistory from "../pages/teacher/manager-attendance/AttendanceHistory";
 
 const teacherRoutes: RouteObject[] = [
   {
@@ -35,7 +36,7 @@ const teacherRoutes: RouteObject[] = [
       { path: "sessions-detail/:id", element: <DetailSessionPage /> },
 
       // Attendance
-
+      { path: "attendance-history/:classId", element: <AttendanceHistory /> },
       { path: "attendance/:sessionId", element: <AttendanceTracking /> },
       { path: "reports", element: <DetailedReports /> },
     ],

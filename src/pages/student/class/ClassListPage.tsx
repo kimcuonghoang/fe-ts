@@ -1,11 +1,13 @@
-import { Card, Table, Tag, Progress } from "antd";
+import { Card, Table, Tag, Progress, Space, Tooltip, Button } from "antd";
 import {
   CalendarOutlined,
+  CheckCircleOutlined,
   ClockCircleOutlined,
   UserOutlined,
 } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
 import { getAllClass } from "../../../common/api/classApi";
+import { Link } from "react-router-dom";
 
 const ClassListPage = () => {
   const user: any = JSON.parse(localStorage.getItem("user") || "null");
@@ -31,10 +33,10 @@ const ClassListPage = () => {
       key: "schedule",
       render: (_: any, record: any) => (
         <div className="text-sm">
-          <div className="flex items-center">
+          {/* <div className="flex items-center">
             <CalendarOutlined className="mr-1 text-blue-500" />
             {record.dayOfWeek}
-          </div>
+          </div> */}
           <div className="flex items-center text-gray-500 mt-1">
             <ClockCircleOutlined className="mr-1" />
             Phòng {record.room}
@@ -79,11 +81,27 @@ const ClassListPage = () => {
           <Tag color="green">Hoạt động</Tag>
         ),
     },
+    {
+      title: "Thao tác",
+      key: "actions",
+      render: (_: any, record: any) => (
+        <Space>
+          <Tooltip title="Xem lịch học">
+            <Link to={`/students/sessions/${record._id}`}>
+              <Button
+                type="primary"
+                icon={<CheckCircleOutlined />}
+                size="small"
+              />
+            </Link>
+          </Tooltip>
+        </Space>
+      ),
+    },
   ];
 
   return (
     <div className="space-y-6">
-      {/* Danh sách lớp giáo viên */}
       <Card title="Danh sách lớp của tôi">
         <Table
           columns={columns}

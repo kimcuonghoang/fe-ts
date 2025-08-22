@@ -26,9 +26,9 @@ const adminMenu = [
     label: <Link to="/teachers/classes">Quản lý lớp học</Link>,
   },
   {
-    key: "/teachers/attendance",
+    key: "/teachers/attendance-history",
     icon: <CheckCircleOutlined />,
-    label: <Link to="/teachers/attendance">Điểm danh & Theo dõi</Link>,
+    label: <Link to="/teachers/attendance-history">Điểm danh & Theo dõi</Link>,
   },
   {
     key: "/teachers/reports",
@@ -46,7 +46,7 @@ const getBreadcrumb = (pathname: string) => {
   const map: Record<string, string> = {
     "/teachers/dashboard": "DashBoard",
     "/teachers/classes": "Quản lý lớp học",
-    "/teachers/attendance": "Điểm danh & Theo dõi",
+    "/teachers/attendance-history": "Điểm danh & Theo dõi",
     "/teachers/reports": "Báo cáo chi tiết",
     "/": "Trở về trang chủ",
   };

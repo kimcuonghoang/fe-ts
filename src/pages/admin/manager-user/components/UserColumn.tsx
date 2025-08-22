@@ -21,7 +21,7 @@ import { TextCell } from "../../../../components/common/TextCell";
 import {
   getColorByRole,
   translateRoles,
-} from "../../../../components/TranslateRole";
+} from "../../../../common/utils/TranslateRole";
 import ModalDetailUser from "./ModalDetailUser";
 import UserForm from "./UserForm";
 import User from "../../../../common/types/user";

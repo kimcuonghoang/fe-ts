@@ -135,7 +135,7 @@ const Header = () => {
               <Link to="/register">
                 <Button
                   type="primary"
-                  className="bg-blue-600 hover:bg-blue-700"
+                  className="[bg:#000080] hover:bg-blue-700"
                 >
                   Đăng ký
                 </Button>

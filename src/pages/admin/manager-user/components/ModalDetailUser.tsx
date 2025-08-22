@@ -9,7 +9,7 @@ import {
 import { Button, Descriptions, DescriptionsProps, Modal, Tag } from "antd";
 import { TextCell } from "../../../../components/common/TextCell";
 import { formatDateLocaleVN } from "../../../../common/utils/formatDate";
-import { translateRoles } from "../../../../components/TranslateRole";
+import { translateRoles } from "../../../../common/utils/TranslateRole";
 import User from "../../../../common/types/user";
 
 const ModalDetailUser = ({

@@ -96,6 +96,15 @@ const MângerClassPage = () => {
               />
             </Link>
           </Tooltip>
+          <Tooltip title="Lịch sử điểm danh">
+            <Link to={`/teachers/attendance-history/${record._id}`}>
+              <Button
+                type="primary"
+                icon={<CheckCircleOutlined />}
+                size="small"
+              />
+            </Link>
+          </Tooltip>
         </Space>
       ),
     },

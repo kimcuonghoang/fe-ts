@@ -1,1 +1,9 @@
 @import "tailwindcss";
+
+.attendance-toggle.ant-switch-checked {
+  background-color: #00cc33 !important; /* xanh khi có mặt */
+}
+
+.attendance-toggle:not(.ant-switch-checked) {
+  background-color: #ff4d4f !important; /* đỏ khi vắng mặt */
+}

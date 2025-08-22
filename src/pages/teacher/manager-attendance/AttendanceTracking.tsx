@@ -23,6 +23,7 @@ import {
 import { getAllSessionByClassId } from "../../../common/api/sessionApi";
 import { getStudentsByClassId } from "../../../common/api/classApi";
 import TextArea from "antd/es/input/TextArea";
+import AttendanceToggle from "../../../components/common/AttendanceToggle";
 
 type RowItem = {
   key: string;
@@ -196,10 +197,9 @@ const AttendanceTracking = () => {
               onChange={(checked) =>
                 setOne(record.studentId, checked ? "PRESENT" : "ABSENT")
               }
-              style={{
-                backgroundColor:
-                  record.status === "PRESENT" ? "#1677ff" : "#ff4d4f",
-              }}
+              checkedChildren="Có mặt"
+              unCheckedChildren="Vắng mặt"
+              className="attendance-toggle"
             />
           );
         },
