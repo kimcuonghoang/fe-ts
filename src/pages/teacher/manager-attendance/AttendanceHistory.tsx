@@ -1,37 +1,93 @@
-import { Table, Tag, Typography, Progress } from "antd";
+import React, { useState, useMemo } from "react";
+import { Table, Tag, Typography, Progress, Pagination } from "antd";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getAllSessionByClassId } from "../../../common/api/sessionApi";
 import { getStudentsByClassId } from "../../../common/api/classApi";
+import { getAttendances } from "../../../common/api/attendanceApi";
+import dayjs from "dayjs";
+import { formatDateLocaleVN } from "../../../common/utils/formatDate";
 
 const { Title } = Typography;
-// Tạo cột động cho 12 buổi học
-const attendanceColumns = Array.from({ length: 12 }, (_, i) => ({
-  title: `Buổi ${i + 1}`,
-  dataIndex: ["attendance", i],
-  key: `session-${i + 1}`,
-  align: "center" as const,
-  width: 100,
-  render: (val: "PRESENT" | "ABSENT") =>
-    val === "PRESENT" ? (
-      <Tag color="blue" style={{ fontWeight: 600 }}>
-        P
-      </Tag>
-    ) : (
-      <Tag color="red" style={{ fontWeight: 600 }}>
-        A
-      </Tag>
-    ),
-}));
 
 const AttendanceHistory = () => {
-  const { classId } = useParams();
-  console.log(classId);
-  const { data: studentsList, isLoading } = useQuery({
+  const { classId } = useParams<{ classId: string }>();
+  const [page, setPage] = useState(1);
+
+  const { data: studentsRes, isLoading: loadingStudents } = useQuery({
     queryKey: ["CLASS_STUDENTS", classId],
     queryFn: () => getStudentsByClassId(classId!),
     enabled: !!classId,
   });
+
+  const { data: sessionsRes, isLoading: loadingSessions } = useQuery({
+    queryKey: ["CLASS_SESSIONS", classId],
+    queryFn: () => getAllSessionByClassId(classId!),
+    enabled: !!classId,
+  });
+
+  const { data: attendanceRes, isLoading: loadingAttendance } = useQuery({
+    queryKey: ["ATTENDANCES", classId],
+    queryFn: () => getAttendances({ classId, limit: 1000 }),
+    enabled: !!classId,
+  });
+
+  const students = studentsRes || [];
+  const sessions = sessionsRes?.data || [];
+  const attendances = attendanceRes?.data || [];
+
+  // Map attendance
+  const attendanceMap = new Map();
+  attendances?.data?.forEach((att: any) => {
+    attendanceMap.set(`${att.studentId._id}-${att.sessionId._id}`, att.status);
+  });
+
+  // DataSource
+  const dataSource = students?.map((stu: any) => {
+    const attendanceForStu = sessions.map((ses: any) => {
+      const status = attendanceMap.get(`${stu._id}-${ses._id}`) || null;
+      return { sessionId: ses._id, status };
+    });
+    return { ...stu, attendance: attendanceForStu };
+  });
+
+  // Chia sessions thành từng nhóm 12 buổi
+  const sessionsGroups = useMemo(() => {
+    const chunkSize = 12;
+    const groups: any[][] = [];
+    for (let i = 0; i < sessions.length; i += chunkSize) {
+      groups.push(sessions.slice(i, i + chunkSize));
+    }
+    return groups;
+  }, [sessions]);
+
+  const currentSessions = sessionsGroups[page - 1] || [];
+
+  // Cột động theo buổi (tối đa 12 cột mỗi trang)
+  const attendanceColumns = currentSessions.map(
+    (session: any, idx: number) => ({
+      title: `Buổi ${(page - 1) * 12 + idx + 1} (${formatDateLocaleVN(
+        session.sessionDates
+      )})`,
+      dataIndex: ["attendance", (page - 1) * 12 + idx],
+      key: `session-${session._id}`,
+      align: "center" as const,
+      width: 50,
+      render: (_: any, record: any) => {
+        const attend = record.attendance[(page - 1) * 12 + idx];
+        if (!attend?.status) return <Tag>-</Tag>;
+        return attend.status === "PRESENT" ? (
+          <Tag color="blue" style={{ fontWeight: 600 }}>
+            P
+          </Tag>
+        ) : (
+          <Tag color="red" style={{ fontWeight: 600 }}>
+            A
+          </Tag>
+        );
+      },
+    })
+  );
 
   const columns = [
     {
@@ -39,8 +95,9 @@ const AttendanceHistory = () => {
       dataIndex: "studentId",
       key: "studentId",
       align: "center" as const,
-      width: 100,
+      width: 80,
       fixed: "left" as const,
+      render: (_: any, record: any) => record.studentId || record.code,
     },
     {
       title: "Tên học sinh",
@@ -58,11 +115,12 @@ const AttendanceHistory = () => {
       width: 150,
       fixed: "right" as const,
       render: (_: any, record: any) => {
-        const total = record.attendance?.length;
-        const presentCount = record.attendance?.filter(
-          (a: string) => a === "PRESENT"
-        )?.length;
-        const percent = Math.round((presentCount / total) * 100);
+        const total = record.attendance?.length || 0;
+        const presentCount =
+          record.attendance?.filter((a: any) => a.status === "PRESENT")
+            ?.length || 0;
+        const percent =
+          total > 0 ? Math.round((presentCount / total) * 100) : 0;
         return (
           <Progress
             percent={percent}
@@ -73,17 +131,30 @@ const AttendanceHistory = () => {
       },
     },
   ];
+
   return (
     <>
       <Title level={3}>Lịch sử điểm danh</Title>
       <Table
         columns={columns}
-        dataSource={studentsList}
-        loading={isLoading}
+        dataSource={dataSource}
+        loading={loadingStudents || loadingSessions || loadingAttendance}
         bordered
-        scroll={{ x: 1200 }}
-        pagination={false} // hiển thị gọn, không phân trang
+        scroll={{ x: "max-content" }}
+        pagination={false}
+        rowKey="_id"
       />
+      {sessionsGroups.length > 1 && (
+        <div style={{ marginTop: 16, textAlign: "right" }}>
+          <Pagination
+            current={page}
+            total={sessions.length}
+            pageSize={12}
+            onChange={(p) => setPage(p)}
+            showSizeChanger={false}
+          />
+        </div>
+      )}
     </>
   );
 };

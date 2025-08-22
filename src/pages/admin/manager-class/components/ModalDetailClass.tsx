@@ -164,17 +164,6 @@ const ModalDetailClass = ({
         />
       ),
     },
-    {
-      key: "13",
-      span: "filled",
-      label: "Số lượng tối đa",
-      children: (
-        <TextCell
-          style={{ fontWeight: 500 }}
-          text={classInfo.maxStudents || "Chưa cập nhật"}
-        />
-      ),
-    },
   ];
   return (
     <>

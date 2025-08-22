@@ -1,3 +1,4 @@
+import { IResponse, Params } from "../types/api";
 import { AttendanceItem } from "../types/attendance";
 import api from "./index";
 
@@ -8,17 +9,11 @@ export const checkAttendanceStatus = async (sessionId: string) => {
   };
 };
 
-export const getAttendances = async (sessionId: string) => {
-  const { data } = await api.get(`/attendances`, { params: { sessionId } });
-  return data as {
-    success: boolean;
-    data: Array<{
-      _id: string;
-      sessionId: string;
-      studentId: { _id: string; fullname: string; studentId?: string };
-      status: boolean;
-    }>;
-  };
+export const getAttendances = async (
+  params?: Params
+): Promise<IResponse<AttendanceItem>> => {
+  const { data } = await api.get(`/attendances`, { params });
+  return data;
 };
 
 export const createAttendance = async (payload: AttendanceItem[]) => {

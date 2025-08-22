@@ -41,6 +41,10 @@ const ClassForm = ({ initialValues, onSubmit, loading }: ClassFormProps) => {
     queryKey: ["teachers"],
     queryFn: () => getAllUser({ role: "teacher" }),
   });
+  const { data: students } = useQuery({
+    queryKey: ["students"],
+    queryFn: () => getAllUser({ role: "student" }),
+  });
 
   // fetch subjects
   const { data: subjects } = useQuery({
@@ -53,6 +57,7 @@ const ClassForm = ({ initialValues, onSubmit, loading }: ClassFormProps) => {
     if (initialValues) {
       form.setFieldsValue({
         ...initialValues,
+        studentIds: initialValues.studentIds?.fullname,
         teacherId: initialValues.teacherId?.fullname,
         subjectId: initialValues.subjectId?.name,
         majorId: initialValues.majorId?.name,
@@ -137,6 +142,22 @@ const ClassForm = ({ initialValues, onSubmit, loading }: ClassFormProps) => {
           placeholder="Chọn giáo viên"
           showSearch
           options={teachers?.data.map((t: any) => ({
+            label: t.fullname,
+            value: t._id,
+          }))}
+          optionFilterProp="label"
+        />
+      </Form.Item>
+      <Form.Item
+        label="Chọn học viên"
+        name="studentIds"
+        rules={[{ required: true, message: "Vui lòng chọn học viên" }]}
+      >
+        <Select
+          mode="multiple"
+          placeholder="Chọn học viên"
+          showSearch
+          options={students?.data.map((t: any) => ({
             label: t.fullname,
             value: t._id,
           }))}

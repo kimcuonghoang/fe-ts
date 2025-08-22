@@ -23,7 +23,6 @@ import {
 import { getAllSessionByClassId } from "../../../common/api/sessionApi";
 import { getStudentsByClassId } from "../../../common/api/classApi";
 import TextArea from "antd/es/input/TextArea";
-import AttendanceToggle from "../../../components/common/AttendanceToggle";
 
 type RowItem = {
   key: string;
@@ -54,28 +53,26 @@ const AttendanceTracking = () => {
     queryFn: () => getAllSessionByClassId(sessionId!),
     enabled: !!sessionId,
   });
-  console.log(sessionDetail);
 
   const hasAttendance = statusData?.data?.hasAttendance ?? false;
   const classId = statusData?.data?.classId;
   const sessionDateStr = sessionDetail?.data?.sessionDates
     ? dayjs(sessionDetail.data.sessionDates).format("DD/MM/YYYY")
     : "";
-  console.log(sessionDateStr);
+
   // 3) Nếu đã có attendance ⇒ lấy danh sách để cập nhật
   const { data: attendanceList, isLoading: loadingAttendances } = useQuery({
     queryKey: ["ATT_LIST", sessionId],
-    queryFn: () => getAttendances(sessionId!),
+    queryFn: () => getAttendances({ sessionId }),
     enabled: !!sessionId && hasAttendance,
   });
-
+  console.log(attendanceList);
   // 4) Nếu chưa có attendance ⇒ lấy danh sách SV theo class để tạo mới
   const { data: studentsList, isLoading: loadingStudents } = useQuery({
     queryKey: ["CLASS_STUDENTS", classId],
     queryFn: () => getStudentsByClassId(classId!),
     enabled: !!classId,
   });
-
   // 5) State table
   const [rows, setRows] = useState<RowItem[]>([]);
 
@@ -249,7 +246,7 @@ const AttendanceTracking = () => {
                 type="primary"
                 onClick={() => mutateCreate.mutate()}
                 loading={mutateCreate.isPending}
-                disabled={loading || rows.length === 0}
+                disabled={loading || rows?.length === 0}
               >
                 Lưu điểm danh
               </Button>

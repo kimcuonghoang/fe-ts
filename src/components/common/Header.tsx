@@ -8,6 +8,7 @@ import {
   DashboardOutlined,
   BookOutlined,
   TeamOutlined,
+  CalendarOutlined,
 } from "@ant-design/icons";
 import { clsx } from "clsx";
 import logo from "../../assets/logo.png";
@@ -63,6 +64,11 @@ const Header = () => {
             icon: <TeamOutlined />,
             label: <Link to="/students/classes">Lớp học của tôi</Link>,
           },
+          {
+            key: "student-attendance",
+            icon: <CalendarOutlined />,
+            label: <Link to="/students/attendances">Lịch sử điểm danh</Link>,
+          },
         ];
       default:
         return [];
@@ -74,8 +80,8 @@ const Header = () => {
       <Menu.Item key="profile" icon={<UserOutlined />}>
         <Link to="/profile">Trang cá nhân</Link>
       </Menu.Item>
-      <Menu.Item key="change-password" icon={<LockOutlined />}>
-        <Link to="/change-password">Đổi mật khẩu</Link>
+      <Menu.Item key="forgot-password" icon={<LockOutlined />}>
+        <Link to="/forgot-password">Đổi mật khẩu</Link>
       </Menu.Item>
       <Menu.Divider />
       {getRoleMenuItems().map((item) => (
