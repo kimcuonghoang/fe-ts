@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Card, Table, Space, DatePicker, Select } from "antd";
 import dayjs from "dayjs";
 import { useQuery } from "@tanstack/react-query";
@@ -14,7 +14,17 @@ const ManagerSessionPage = () => {
     queryFn: () => getAllSessionByClassId(classId!),
     enabled: !!classId,
   });
-  const sessions = data?.data;
+  const sessions = data?.data ?? [];
+
+  // Sort tăng dần theo sessionDates trước khi truyền vào Table
+  const sortedSessions = useMemo(() => {
+    return [...sessions].sort((a: any, b: any) => {
+      const aTime = dayjs(a.sessionDates).valueOf() || 0;
+      const bTime = dayjs(b.sessionDates).valueOf() || 0;
+      return aTime - bTime; // tăng dần
+    });
+  }, [sessions]);
+
   const columns = [
     {
       title: "Ngày học",
@@ -80,9 +90,9 @@ const ManagerSessionPage = () => {
       <Card title="Danh sách buổi học">
         <Table
           columns={columns}
-          dataSource={sessions}
+          dataSource={sortedSessions}
           loading={isLoading}
-          rowKey="id"
+          rowKey="_id"
           pagination={{
             showTotal: (total, range) =>
               `${range[0]}-${range[1]} của ${total} buổi học`,

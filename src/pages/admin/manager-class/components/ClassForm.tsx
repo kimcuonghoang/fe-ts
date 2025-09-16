@@ -57,10 +57,10 @@ const ClassForm = ({ initialValues, onSubmit, loading }: ClassFormProps) => {
     if (initialValues) {
       form.setFieldsValue({
         ...initialValues,
-        studentIds: initialValues.studentIds?.fullname,
-        teacherId: initialValues.teacherId?.fullname,
-        subjectId: initialValues.subjectId?.name,
-        majorId: initialValues.majorId?.name,
+        studentIds: initialValues.studentIds,
+        teacherId: initialValues.teacherId?._id,
+        subjectId: initialValues.subjectId?._id,
+        majorId: initialValues.majorId?._id,
         startDate: initialValues.startDate
           ? dayjs(initialValues.startDate)
           : null,
@@ -83,117 +83,136 @@ const ClassForm = ({ initialValues, onSubmit, loading }: ClassFormProps) => {
     };
     onSubmit(payload);
   };
-
+  const dayOfWeek = [
+    { label: "Thứ 2", value: 2 },
+    { label: "Thứ 3", value: 3 },
+    { label: "Thứ 4", value: 4 },
+    { label: "Thứ 5", value: 5 },
+    { label: "Thứ 6", value: 6 },
+    { label: "Thứ 7", value: 7 },
+    { label: "Chủ nhật", value: 8 },
+  ];
   return (
     <Form form={form} layout="vertical" onFinish={handleFinish}>
-      <Form.Item
-        label="Tên lớp"
-        name="name"
-        rules={[{ required: true, message: "Vui lòng nhập tên lớp" }]}
-      >
-        <Input placeholder="Nhập tên lớp" />
-      </Form.Item>
+      <div className="grid grid-cols-2 gap-8">
+        <div className="space-y-4">
+          <Form.Item
+            label="Tên lớp"
+            name="name"
+            rules={[{ required: true, message: "Vui lòng nhập tên lớp" }]}
+          >
+            <Input placeholder="Nhập tên lớp" />
+          </Form.Item>
 
-      <Form.Item
-        label="Ngày học trong tuần"
-        name="daysOfWeek"
-        rules={[{ required: true, message: "Vui lòng nhập ngày học" }]}
-      >
-        <Input placeholder="Ví dụ: 2-4-6 hoặc 3-5-7" />
-      </Form.Item>
+          <Form.Item
+            label="Ngày học trong tuần"
+            name="daysOfWeek"
+            rules={[{ required: true, message: "Vui lòng chọn ngày học" }]}
+          >
+            <Select
+              mode="multiple"
+              placeholder="Chọn ngày học"
+              options={dayOfWeek}
+            />
+          </Form.Item>
 
-      {/* Chuyên ngành */}
-      <Form.Item
-        label="Chuyên ngành"
-        name="majorId"
-        rules={[{ required: true, message: "Vui lòng chọn chuyên ngành" }]}
-      >
-        <Select
-          placeholder="Chọn chuyên ngành"
-          options={majors?.data.map((m: any) => ({
-            label: m.name,
-            value: m._id,
-          }))}
-        />
-      </Form.Item>
+          {/* Chuyên ngành */}
+          <Form.Item
+            label="Chuyên ngành"
+            name="majorId"
+            rules={[{ required: true, message: "Vui lòng chọn chuyên ngành" }]}
+          >
+            <Select
+              placeholder="Chọn chuyên ngành"
+              options={majors?.data.map((m: any) => ({
+                label: m.name,
+                value: m._id,
+              }))}
+            />
+          </Form.Item>
 
-      {/* Môn học */}
-      <Form.Item
-        label="Môn học"
-        name="subjectId"
-        rules={[{ required: true, message: "Vui lòng chọn môn học" }]}
-      >
-        <Select
-          placeholder="Chọn môn học"
-          options={subjects?.data.map((s: any) => ({
-            label: s.name,
-            value: s._id,
-          }))}
-        />
-      </Form.Item>
+          {/* Môn học */}
+          <Form.Item
+            label="Môn học"
+            name="subjectId"
+            rules={[{ required: true, message: "Vui lòng chọn môn học" }]}
+          >
+            <Select
+              placeholder="Chọn môn học"
+              options={subjects?.data.map((s: any) => ({
+                label: s.name,
+                value: s._id,
+              }))}
+            />
+          </Form.Item>
 
-      {/* Giáo viên */}
-      <Form.Item
-        label="Giáo viên phụ trách"
-        name="teacherId"
-        rules={[{ required: true, message: "Vui lòng chọn giáo viên" }]}
-      >
-        <Select
-          placeholder="Chọn giáo viên"
-          showSearch
-          options={teachers?.data.map((t: any) => ({
-            label: t.fullname,
-            value: t._id,
-          }))}
-          optionFilterProp="label"
-        />
-      </Form.Item>
-      <Form.Item
-        label="Chọn học viên"
-        name="studentIds"
-        rules={[{ required: true, message: "Vui lòng chọn học viên" }]}
-      >
-        <Select
-          mode="multiple"
-          placeholder="Chọn học viên"
-          showSearch
-          options={students?.data.map((t: any) => ({
-            label: t.fullname,
-            value: t._id,
-          }))}
-          optionFilterProp="label"
-        />
-      </Form.Item>
+          {/* Giáo viên */}
+          <Form.Item
+            label="Giáo viên phụ trách"
+            name="teacherId"
+            rules={[{ required: true, message: "Vui lòng chọn giáo viên" }]}
+          >
+            <Select
+              placeholder="Chọn giáo viên"
+              showSearch
+              options={teachers?.data.map((t: any) => ({
+                label: t.fullname,
+                value: t._id,
+              }))}
+              optionFilterProp="label"
+            />
+          </Form.Item>
+        </div>
+        <div className="space-y-4">
+          <Form.Item label="Ngày bắt đầu" name="startDate">
+            <DatePicker
+              format="YYYY-MM-DD"
+              style={{ width: "100%" }}
+              disabledDate={(current) =>
+                current && current < dayjs().startOf("day")
+              }
+            />
+          </Form.Item>
 
-      <Form.Item label="Ngày bắt đầu" name="startDate">
-        <DatePicker format="YYYY-MM-DD" style={{ width: "100%" }} />
-      </Form.Item>
+          <Form.Item label="Số buổi học" name="totalSessions" initialValue={17}>
+            <InputNumber min={1} max={100} style={{ width: "100%" }} />
+          </Form.Item>
 
-      <Form.Item label="Số buổi học" name="totalSessions" initialValue={100}>
-        <InputNumber min={1} max={100} style={{ width: "100%" }} />
-      </Form.Item>
+          <Form.Item
+            label="Ca học"
+            name="shift"
+            rules={[{ required: true, message: "Vui lòng chọn ca học" }]}
+          >
+            <Select placeholder="Chọn ca học" options={SHIFT_OPTIONS} />
+          </Form.Item>
 
-      <Form.Item
-        label="Ca học"
-        name="shift"
-        rules={[{ required: true, message: "Vui lòng chọn ca học" }]}
-      >
-        <Select placeholder="Chọn ca học" options={SHIFT_OPTIONS} />
-      </Form.Item>
+          <Form.Item
+            label="Phòng học"
+            name="room"
+            rules={[{ required: true, message: "Vui lòng chọn phòng học" }]}
+          >
+            <Select placeholder="Chọn phòng học" options={ROOM_OPTIONS} />
+          </Form.Item>
+          <Form.Item label="Chọn học viên" name="studentIds">
+            <Select
+              mode="multiple"
+              placeholder="Chọn học viên"
+              showSearch
+              options={students?.data.map((t: any) => ({
+                label: t.fullname,
+                value: t._id,
+              }))}
+              optionFilterProp="label"
+            />
+          </Form.Item>
+        </div>
+      </div>
 
-      <Form.Item
-        label="Phòng học"
-        name="room"
-        rules={[{ required: true, message: "Vui lòng chọn phòng học" }]}
-      >
-        <Select placeholder="Chọn phòng học" options={ROOM_OPTIONS} />
-      </Form.Item>
-
-      <Form.Item>
+      <div className="flex justify-center mt-6">
         <Button type="primary" htmlType="submit" loading={loading}>
           Lưu
         </Button>
-      </Form.Item>
+      </div>
     </Form>
   );
 };

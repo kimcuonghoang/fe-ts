@@ -7,3 +7,39 @@
 .attendance-toggle:not(.ant-switch-checked) {
   background-color: #ff4d4f !important; /* đỏ khi vắng mặt */
 }
+
+/* Nếu bạn muốn override Ant Design trực tiếp */
+.ant-form-vertical .ant-form-item-label > label {
+  font-weight: 600;
+  color: #1f2937; /* text-gray-800 */
+}
+
+.ant-input,
+.ant-select-selector,
+.ant-picker {
+  border-radius: 0.75rem !important; /* rounded-xl */
+  /* padding: 8px 12px; */
+  border: 1px solid #d1d5db; /* border-gray-300 */
+  transition: all 0.2s;
+}
+
+.ant-input:focus,
+.ant-select-selector:focus-within,
+.ant-picker-focused {
+  border-color: #2563eb !important; /* blue-600 */
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2); /* focus ring */
+}
+
+.ant-btn-primary {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  border: none;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  padding: 6px 20px;
+  transition: transform 0.2s;
+}
+
+.ant-btn-primary:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, #1d4ed8, #1e40af);
+}

@@ -11,9 +11,9 @@ export const checkAttendanceStatus = async (sessionId: string) => {
 
 export const getAttendances = async (
   params?: Params
-): Promise<IResponse<AttendanceItem>> => {
+): Promise<IResponse<AttendanceItem[]>> => {
   const { data } = await api.get(`/attendances`, { params });
-  return data;
+  return data.data;
 };
 
 export const createAttendance = async (payload: AttendanceItem[]) => {

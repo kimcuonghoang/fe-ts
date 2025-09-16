@@ -5,8 +5,9 @@ import { useQuery } from "@tanstack/react-query";
 import { getAllSessionByClassId } from "../../../common/api/sessionApi";
 import { getStudentsByClassId } from "../../../common/api/classApi";
 import { getAttendances } from "../../../common/api/attendanceApi";
-import dayjs from "dayjs";
+
 import { formatDateLocaleVN } from "../../../common/utils/formatDate";
+import dayjs from "dayjs";
 
 const { Title } = Typography;
 
@@ -14,6 +15,7 @@ const AttendanceHistory = () => {
   const { classId } = useParams<{ classId: string }>();
   const [page, setPage] = useState(1);
 
+  // Fetch dữ liệu
   const { data: studentsRes, isLoading: loadingStudents } = useQuery({
     queryKey: ["CLASS_STUDENTS", classId],
     queryFn: () => getStudentsByClassId(classId!),
@@ -33,18 +35,25 @@ const AttendanceHistory = () => {
   });
 
   const students = studentsRes || [];
-  const sessions = sessionsRes?.data || [];
   const attendances = attendanceRes?.data || [];
+
+  // Sort sessions theo ngày tăng dần
+  const sortedSessions = useMemo(() => {
+    return [...(sessionsRes?.data || [])].sort(
+      (a: any, b: any) =>
+        dayjs(a.sessionDates).valueOf() - dayjs(b.sessionDates).valueOf()
+    );
+  }, [sessionsRes]);
 
   // Map attendance
   const attendanceMap = new Map();
-  attendances?.data?.forEach((att: any) => {
+  attendances?.forEach((att: any) => {
     attendanceMap.set(`${att.studentId._id}-${att.sessionId._id}`, att.status);
   });
 
   // DataSource
   const dataSource = students?.map((stu: any) => {
-    const attendanceForStu = sessions.map((ses: any) => {
+    const attendanceForStu = sortedSessions.map((ses: any) => {
       const status = attendanceMap.get(`${stu._id}-${ses._id}`) || null;
       return { sessionId: ses._id, status };
     });
@@ -55,11 +64,11 @@ const AttendanceHistory = () => {
   const sessionsGroups = useMemo(() => {
     const chunkSize = 12;
     const groups: any[][] = [];
-    for (let i = 0; i < sessions.length; i += chunkSize) {
-      groups.push(sessions.slice(i, i + chunkSize));
+    for (let i = 0; i < sortedSessions.length; i += chunkSize) {
+      groups.push(sortedSessions.slice(i, i + chunkSize));
     }
     return groups;
-  }, [sessions]);
+  }, [sortedSessions]);
 
   const currentSessions = sessionsGroups[page - 1] || [];
 
@@ -69,12 +78,12 @@ const AttendanceHistory = () => {
       title: `Buổi ${(page - 1) * 12 + idx + 1} (${formatDateLocaleVN(
         session.sessionDates
       )})`,
-      dataIndex: ["attendance", (page - 1) * 12 + idx],
       key: `session-${session._id}`,
       align: "center" as const,
       width: 50,
       render: (_: any, record: any) => {
         const attend = record.attendance[(page - 1) * 12 + idx];
+
         if (!attend?.status) return <Tag>-</Tag>;
         return attend.status === "PRESENT" ? (
           <Tag color="blue" style={{ fontWeight: 600 }}>
@@ -148,7 +157,7 @@ const AttendanceHistory = () => {
         <div style={{ marginTop: 16, textAlign: "right" }}>
           <Pagination
             current={page}
-            total={sessions.length}
+            total={sortedSessions.length}
             pageSize={12}
             onChange={(p) => setPage(p)}
             showSizeChanger={false}
