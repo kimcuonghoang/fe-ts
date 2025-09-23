@@ -129,7 +129,7 @@ const UserForm = ({ children, userEdit }: UserFormProps) => {
                 <Select placeholder="Chọn vai trò của người dùng">
                   <Option value="teacher">Giảng viên</Option>
                   <Option value="student">Học sinh</Option>
-                  <Option value="admin">Quản trị viên</Option>
+                  {/* <Option value="admin">Quản trị viên</Option> */}
                 </Select>
               </Form.Item>
               {selectedRole === "student" && !userEdit && (

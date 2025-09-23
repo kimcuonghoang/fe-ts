@@ -22,28 +22,31 @@ interface ClassSchedule {
 
 const ClassSchedulePage = () => {
   const { classId } = useParams();
-  const [selectedDate, setSelectedDate] = useState<Dayjs | null>(null);
 
-  const { data, isLoading } = useQuery({
+  const { data: sessions = [], isLoading } = useQuery({
     queryKey: ["SESSIONS", classId],
     queryFn: () => getAllSessionByClassId(classId!),
     enabled: !!classId,
   });
 
-  const apiData: ClassSchedule[] = useMemo(() => {
-    if (!data?.data) return [];
-    console.log(data.data);
-    return data.data.map((s: any, index: number) => {
-      return {
-        _id: s._id || index.toString(),
-        subjectId: s.classId?.subjectId?.name,
-        teacherId: s.classId?.teacherId?.fullname,
-        day: dayjs(s.sessionDates).format("dddd"),
-        date: dayjs(s.sessionDates).format("YYYY-MM-DD"),
-        room: s.classId.room,
-      };
+  const sortedSessions = useMemo(() => {
+    return [...sessions].sort((a, b) => {
+      return dayjs(a.sessionDates).valueOf() - dayjs(b.sessionDates).valueOf();
     });
-  }, [data]);
+  }, [sessions]);
+
+  const apiData: ClassSchedule[] = useMemo(() => {
+    return sortedSessions.map((s, index) => ({
+      key: s._id || index.toString(),
+      subjectId: s.classId?.subjectId?.name,
+      teacherId: s.classId?.teacherId?.fullname,
+      day: dayjs(s.sessionDates).format("dddd"),
+      date: dayjs(s.sessionDates).format("YYYY-MM-DD"),
+      room: s.classId?.room,
+    }));
+  }, [sortedSessions]);
+
+  const className = sessions?.[0]?.classId?.name || "Chưa cập nhật";
 
   const columns: ColumnsType<ClassSchedule> = [
     {
@@ -76,11 +79,11 @@ const ClassSchedulePage = () => {
     },
   ];
 
-  const filteredData = selectedDate ? apiData.filter((item) => item) : apiData;
-  console.log(filteredData);
+  const filteredData = apiData.filter((item) => item);
+
   return (
     <div style={{ padding: 20 }}>
-      <Title level={3}>Lịch học của lớp</Title>
+      <Title level={3}>Lịch học của lớp {className}</Title>
 
       {/* <Space style={{ marginBottom: 16 }}>
         <DatePicker

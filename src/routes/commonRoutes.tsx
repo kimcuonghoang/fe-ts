@@ -21,7 +21,7 @@ const commonRoutes: RouteObject[] = [
         element: <PrivacyPage />,
       },
       {
-        path: "/tems",
+        path: "/terms",
         element: <TemsPage />,
       },
       { path: "/courses", element: <CoursesPage /> },

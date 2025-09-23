@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { Table, Tag, Typography, Progress, Pagination } from "antd";
-import { useParams } from "react-router-dom";
+import { Session, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getAllSessionByClassId } from "../../../common/api/sessionApi";
 import { getStudentsByClassId } from "../../../common/api/classApi";
@@ -8,10 +8,12 @@ import { getAttendances } from "../../../common/api/attendanceApi";
 
 import { formatDateLocaleVN } from "../../../common/utils/formatDate";
 import dayjs from "dayjs";
+import { useTable } from "../../../common/hooks/useTable";
 
 const { Title } = Typography;
 
 const AttendanceHistory = () => {
+  const { query } = useTable<Session>();
   const { classId } = useParams<{ classId: string }>();
   const [page, setPage] = useState(1);
 
@@ -23,11 +25,10 @@ const AttendanceHistory = () => {
   });
 
   const { data: sessionsRes, isLoading: loadingSessions } = useQuery({
-    queryKey: ["CLASS_SESSIONS", classId],
-    queryFn: () => getAllSessionByClassId(classId!),
+    queryKey: ["SESSIONS", classId, ...Object.values(query)],
+    queryFn: () => getAllSessionByClassId(classId!, query),
     enabled: !!classId,
   });
-
   const { data: attendanceRes, isLoading: loadingAttendance } = useQuery({
     queryKey: ["ATTENDANCES", classId],
     queryFn: () => getAttendances({ classId, limit: 1000 }),

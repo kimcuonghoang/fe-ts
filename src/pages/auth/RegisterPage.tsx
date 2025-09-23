@@ -3,18 +3,28 @@ import { useMutation } from "@tanstack/react-query";
 import { authRegister } from "../../common/api/authApi";
 
 import { MailOutlined, LockOutlined, UserOutlined } from "@ant-design/icons";
-import { Button, Form, Input, message } from "antd";
+import { Button, Form, Input, Checkbox, message } from "antd";
 
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { registerSchema } from "../../common/validations/authSchema";
+import { z } from "zod";
+
 type FormData = {
   fullname: string;
   email: string;
   password: string;
   confirmPassword: string;
   phoneNumber?: string;
+  acceptTerms: boolean;
 };
+
+// mở rộng schema để validate checkbox
+const extendedRegisterSchema = registerSchema.extend({
+  acceptTerms: z.literal(true, {
+    message: "Bạn phải đồng ý với Điều khoản và Chính sách bảo mật",
+  }),
+});
 
 const RegisterPage = () => {
   const {
@@ -23,8 +33,9 @@ const RegisterPage = () => {
     reset,
     formState: { errors },
   } = useForm<FormData>({
-    resolver: zodResolver(registerSchema),
+    resolver: zodResolver(extendedRegisterSchema),
   });
+
   const navigate = useNavigate();
   const { mutate, isPending } = useMutation({
     mutationKey: ["register"],
@@ -51,6 +62,7 @@ const RegisterPage = () => {
       </h2>
 
       <Form layout="vertical" onFinish={handleSubmit(onSubmit)}>
+        {/* Fullname */}
         <Form.Item
           label="Họ và tên"
           help={errors.fullname?.message}
@@ -70,6 +82,7 @@ const RegisterPage = () => {
           />
         </Form.Item>
 
+        {/* Email */}
         <Form.Item
           label="Email"
           help={errors.email?.message}
@@ -89,6 +102,7 @@ const RegisterPage = () => {
           />
         </Form.Item>
 
+        {/* Password */}
         <Form.Item
           label="Mật khẩu"
           help={errors.password?.message}
@@ -107,6 +121,8 @@ const RegisterPage = () => {
             )}
           />
         </Form.Item>
+
+        {/* Confirm Password */}
         <Form.Item
           label="Xác nhận mật khẩu"
           help={errors.confirmPassword?.message}
@@ -126,6 +142,29 @@ const RegisterPage = () => {
           />
         </Form.Item>
 
+        {/* Checkbox Terms */}
+        <Form.Item
+          help={errors.acceptTerms?.message}
+          validateStatus={errors.acceptTerms ? "error" : ""}
+        >
+          <Controller
+            name="acceptTerms"
+            control={control}
+            render={({ field }) => (
+              <Checkbox {...field} checked={field.value}>
+                Tôi đồng ý với{" "}
+                <Link to="/terms" className="text-blue-500 hover:underline">
+                  Điều khoản dịch vụ
+                </Link>{" "}
+                và{" "}
+                <Link to="/privacy" className="text-blue-500 hover:underline">
+                  Chính sách bảo mật
+                </Link>
+              </Checkbox>
+            )}
+          />
+        </Form.Item>
+
         <Form.Item>
           <Button
             type="primary"
@@ -135,7 +174,7 @@ const RegisterPage = () => {
             size="large"
             className="bg-blue-600 hover:bg-blue-700"
           >
-            Đăng nhập
+            Đăng ký
           </Button>
         </Form.Item>
       </Form>

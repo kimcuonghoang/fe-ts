@@ -27,7 +27,7 @@ export const registerSchema = z
   });
 
 export const loginSchema = z.object({
-  email: z.string().email("Email không hợp lệ"),
+  email: z.email("Email không hợp lệ"),
   password: z
     .string("Mật khẩu là trường bắt buộc")
     .min(8, "Mật khẩu phải có ít nhất 8 ký tự")

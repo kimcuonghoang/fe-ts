@@ -35,6 +35,7 @@ const AttendanceSchedulePage = () => {
     queryFn: () => getAttendances({ classId }),
     enabled: !!classId,
   });
+  console.log(attendanceRes);
 
   const apiData: AttendanceSchedule[] = useMemo(() => {
     if (!sessionRes?.data) return [];

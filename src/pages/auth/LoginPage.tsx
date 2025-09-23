@@ -27,6 +27,7 @@ const LoginPage = () => {
     mutationKey: ["login"],
     mutationFn: async (values: any) => authLogin(values),
   });
+
   const onFinish = async (values: any) => {
     mutate(values, {
       onSuccess: (res) => {
@@ -118,6 +119,19 @@ const LoginPage = () => {
           Đăng ký ngay
         </Link>
       </div>
+
+      {/* Link Terms + Privacy */}
+      <p className="text-xs text-gray-500 text-center mt-6">
+        Khi đăng nhập, bạn đồng ý với{" "}
+        <Link to="/terms" className="text-blue-500 hover:underline">
+          Điều khoản dịch vụ
+        </Link>{" "}
+        và{" "}
+        <Link to="/privacy" className="text-blue-500 hover:underline">
+          Chính sách bảo mật
+        </Link>{" "}
+        của chúng tôi.
+      </p>
     </div>
   );
 };
