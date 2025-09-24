@@ -32,12 +32,17 @@ type RowItem = {
   fullname: string;
   email: string;
   status: "PRESENT" | "ABSENT";
+  note?: string;
 };
 
 const { Title, Text } = Typography;
 
 const AttendanceTracking = () => {
-  const { sessionId } = useParams<{ sessionId: string }>();
+  const { sessionId, classId: routeClassId } = useParams<{
+    sessionId: string;
+    classId: string;
+  }>();
+  console.log(routeClassId);
   const queryClient = useQueryClient();
 
   // 1) Trạng thái buổi học đã điểm danh chưa
@@ -48,14 +53,16 @@ const AttendanceTracking = () => {
   });
 
   // 2) Lấy thông tin session (để hiển thị & biết classId)
-  const { data: sessionDetail, isLoading: loadingSession } = useQuery({
-    queryKey: ["SESSION_DETAIL", sessionId],
-    queryFn: () => getAllSessionByClassId(sessionId!),
-    enabled: !!sessionId,
+  const { data: sessionList, isLoading: loadingSession } = useQuery({
+    queryKey: ["SESSION_DETAIL", routeClassId],
+    queryFn: () => getAllSessionByClassId(routeClassId!),
+    enabled: !!routeClassId,
   });
-
+  const sessionDetail = sessionList?.data?.find(
+    (s: any) => s._id === sessionId
+  );
   const hasAttendance = statusData?.data?.hasAttendance ?? false;
-  const classId = statusData?.data?.classId;
+  const classId = statusData?.data?.classId || routeClassId;
   const sessionDateStr = sessionDetail?.data?.sessionDates
     ? dayjs(sessionDetail.data.sessionDates).format("DD/MM/YYYY")
     : "";
@@ -66,7 +73,7 @@ const AttendanceTracking = () => {
     queryFn: () => getAttendances({ sessionId }),
     enabled: !!sessionId && hasAttendance,
   });
-  console.log(attendanceList);
+
   // 4) Nếu chưa có attendance ⇒ lấy danh sách SV theo class để tạo mới
   const { data: studentsList, isLoading: loadingStudents } = useQuery({
     queryKey: ["CLASS_STUDENTS", classId],
@@ -104,12 +111,12 @@ const AttendanceTracking = () => {
 
   // 7) Actions
   const setAll = (status: RowItem["status"]) => {
-    setRows((prev) => prev.map((r) => ({ ...r, status })));
+    setRows((prev) => prev?.map((r) => ({ ...r, status })));
   };
 
   const setOne = (studentId: string, status: RowItem["status"]) => {
     setRows((prev) =>
-      prev.map((r) => (r.studentId === studentId ? { ...r, status } : r))
+      prev?.map((r) => (r.studentId === studentId ? { ...r, status } : r))
     );
   };
 
@@ -128,12 +135,10 @@ const AttendanceTracking = () => {
     },
     onSuccess: async () => {
       message.success("Điểm danh thành công");
-      await queryClient.invalidateQueries({
-        queryKey: ["ATT_STATUS", sessionId],
-      });
-      await queryClient.invalidateQueries({
-        queryKey: ["ATT_LIST", sessionId],
-      });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["ATT_STATUS", sessionId] }),
+        queryClient.invalidateQueries({ queryKey: ["ATT_LIST", sessionId] }),
+      ]);
     },
     onError: () => message.error("Lỗi khi điểm danh"),
   });
@@ -178,11 +183,26 @@ const AttendanceTracking = () => {
         render: (val: string) => val || <Tag>Chưa có mã</Tag>,
       },
       {
-        title: "Note",
+        title: "Ghi chú",
         dataIndex: "note",
         key: "note",
-        render: (val: string) => val || <TextArea rows={1} />,
+        render: (_: string, record: RowItem) => (
+          <TextArea
+            rows={1}
+            value={record.note}
+            onChange={(e) =>
+              setRows((prev) =>
+                prev.map((r) =>
+                  r.studentId === record.studentId
+                    ? { ...r, note: e.target.value }
+                    : r
+                )
+              )
+            }
+          />
+        ),
       },
+
       {
         title: "Điểm danh",
         key: "status",
@@ -211,8 +231,7 @@ const AttendanceTracking = () => {
           Điểm danh buổi học
         </Title>
         <Text>
-          Lớp: <b>{sessionDetail?.data?.classId?.name || "—"}</b> • Ngày học:{" "}
-          <b>{sessionDateStr || "—"}</b> • Trạng thái:{" "}
+          Trạng thái:{" "}
           {hasAttendance ? (
             <Tag color="green">Đã khởi tạo</Tag>
           ) : (

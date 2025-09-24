@@ -4,17 +4,27 @@ import dayjs from "dayjs";
 import { useQuery } from "@tanstack/react-query";
 import { getAllSessionByClassId } from "../../../common/api/sessionApi";
 import { Link, useParams } from "react-router-dom";
+import { useTable } from "../../../common/hooks/useTable";
+import { Session } from "../../../common/types/session";
 
 const ManagerSessionPage = () => {
   const { classId } = useParams();
-  const [selectedDate, setSelectedDate] = useState(dayjs());
-  const [selectedClass, setSelectedClass] = useState<string | null>(null);
+  const {
+    resetFilter,
+    onFilter,
+    query,
+    onChangeSearchInput,
+    onSubmitSearch,
+    getSorterProps,
+    onSelectPaginateChange,
+  } = useTable<Session>();
   const { data, isLoading } = useQuery({
-    queryKey: ["SESSIONS", classId],
-    queryFn: () => getAllSessionByClassId(classId!),
+    queryKey: ["SESSIONS", classId, ...Object.values(query)],
+    queryFn: () => getAllSessionByClassId(classId!, query),
     enabled: !!classId,
   });
-  const sessions = data?.data ?? [];
+  console.log(data);
+  const sessions = data ?? [];
 
   // Sort tăng dần theo sessionDates trước khi truyền vào Table
   const sortedSessions = useMemo(() => {
@@ -32,6 +42,7 @@ const ManagerSessionPage = () => {
       key: "sessionDates",
       render: (sessionDates: string) =>
         dayjs(sessionDates).format("DD/MM/YYYY"),
+      ...getSorterProps("sessionDates"),
     },
     {
       title: "Lớp",
@@ -44,7 +55,7 @@ const ManagerSessionPage = () => {
       dataIndex: "teacherId",
       key: "teacherId",
       render: (_: any, record: any) =>
-        record.teacherId?.fullname || "Chưa cập nhật",
+        record.classId?.teacherId?.fullname || "Chưa cập nhật",
     },
     {
       title: "Hành động",
@@ -59,39 +70,13 @@ const ManagerSessionPage = () => {
 
   return (
     <div className="space-y-6">
-      {/* Bộ lọc */}
-      <Card>
-        <div className="flex gap-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">Chọn ngày</label>
-            <DatePicker
-              value={selectedDate}
-              onChange={setSelectedDate}
-              format="DD/MM/YYYY"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Chọn lớp</label>
-            <Select
-              placeholder="Tất cả lớp"
-              value={selectedClass}
-              onChange={setSelectedClass}
-              className="w-48"
-              allowClear
-            >
-              <Select.Option value="react">ReactJS Cơ bản</Select.Option>
-              <Select.Option value="node">NodeJS Nâng cao</Select.Option>
-            </Select>
-          </div>
-        </div>
-      </Card>
-
       {/* Bảng danh sách buổi học */}
       <Card title="Danh sách buổi học">
         <Table
           columns={columns}
           dataSource={sortedSessions}
           loading={isLoading}
+          onChange={onFilter}
           rowKey="_id"
           pagination={{
             showTotal: (total, range) =>
