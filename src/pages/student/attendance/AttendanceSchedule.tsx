@@ -29,21 +29,20 @@ const AttendanceSchedulePage = () => {
     queryFn: () => getAllSessionByClassId(classId!),
     enabled: !!classId,
   });
-
+  const className = sessionRes?.[0]?.classId?.name || "Chưa cập nhật";
   const { data: attendanceRes, isLoading: loadingAttendance } = useQuery({
     queryKey: ["ATTENDANCES", classId],
     queryFn: () => getAttendances({ classId }),
     enabled: !!classId,
   });
-  console.log(attendanceRes);
 
   const apiData: AttendanceSchedule[] = useMemo(() => {
-    if (!sessionRes?.data) return [];
+    if (!sessionRes) return [];
 
     // lấy đúng mảng attendances
-    const attendances = attendanceRes?.data || [];
+    const attendances = attendanceRes || [];
 
-    return sessionRes.data
+    return sessionRes
       .map((s: any, index: number) => {
         const attendance = attendances.find(
           (a: any) => a.sessionId._id === s._id
@@ -54,17 +53,13 @@ const AttendanceSchedulePage = () => {
           subjectId: s.classId?.subjectId?.name || "N/A",
           teacherId: s.classId?.teacherId?.fullname || "N/A",
           day: dayjs(s.sessionDates).format("dddd"),
-          date: new Date(s.sessionDates).toLocaleDateString("vi-VN"),
-          rawDate: new Date(s.sessionDates), // thêm rawDate để sort
-          status: attendance?.status || null, // PRESENT | ABSENT | null
+          date: dayjs(s.sessionDates).format("DD/MM/YYYY"),
+          rawDate: dayjs(s.sessionDates).toDate(),
+          status: attendance?.status || null,
         };
       })
-      .sort(
-        (a: { rawDate: Date }, b: { rawDate: Date }) =>
-          a.rawDate.getTime() - b.rawDate.getTime()
-      ); // tăng dần theo ngày
+      .sort((a, b) => a.rawDate.getTime() - b.rawDate.getTime());
   }, [sessionRes, attendanceRes]);
-
   const columns: ColumnsType<AttendanceSchedule> = [
     {
       title: "Môn học",
@@ -118,7 +113,7 @@ const AttendanceSchedulePage = () => {
 
   return (
     <div style={{ padding: 20 }}>
-      <Title level={3}>Điểm danh của lớp</Title>
+      <Title level={3}>Điểm danh của lớp {className}</Title>
 
       <Table
         columns={columns}

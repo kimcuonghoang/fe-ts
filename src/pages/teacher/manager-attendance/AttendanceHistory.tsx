@@ -36,11 +36,12 @@ const AttendanceHistory = () => {
   });
 
   const students = studentsRes || [];
-  const attendances = attendanceRes?.data || [];
+  const attendances = attendanceRes || [];
 
   // Sort sessions theo ngày tăng dần
   const sortedSessions = useMemo(() => {
-    return [...(sessionsRes?.data || [])].sort(
+    const sessions = sessionsRes || [];
+    return [...sessions].sort(
       (a: any, b: any) =>
         dayjs(a.sessionDates).valueOf() - dayjs(b.sessionDates).valueOf()
     );

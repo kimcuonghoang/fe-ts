@@ -23,7 +23,8 @@ const ManagerSessionPage = () => {
     queryFn: () => getAllSessionByClassId(classId!, query),
     enabled: !!classId,
   });
-  const sessions = data?.data ?? [];
+  console.log(data);
+  const sessions = data ?? [];
 
   // Sort tăng dần theo sessionDates trước khi truyền vào Table
   const sortedSessions = useMemo(() => {

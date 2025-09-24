@@ -13,7 +13,7 @@ export const getAttendances = async (
   params?: Params
 ): Promise<IResponse<AttendanceItem[]>> => {
   const { data } = await api.get(`/attendances`, { params });
-  return data.data;
+  return data.data.data;
 };
 
 export const createAttendance = async (payload: AttendanceItem[]) => {
