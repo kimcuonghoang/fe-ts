@@ -144,12 +144,12 @@ const ModalDetailUser = ({
         title={
           <div style={{ display: "flex", alignItems: "center", gap: 15 }}>
             <p style={{ margin: 0 }}>
-              Chi tiết {translateRoles(userInfo.role)?.toLowerCase()}
-              {""}
+              Chi tiết {translateRoles(userInfo.role)}
+              {" - "}
               {userInfo.username}
             </p>
             {userInfo.isBlocked ? (
-              <Tag color="red">Đã xóa</Tag>
+              <Tag color="red">Đã khóa</Tag>
             ) : (
               <Tag color="green">Hoạt động</Tag>
             )}

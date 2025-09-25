@@ -20,7 +20,7 @@ const ManagerUserPage = () => {
     getSorterProps,
     onSelectPaginateChange,
   } = useTable<User>();
-  console.log(query.filterParams);
+
   const { data, isLoading } = useQuery({
     queryKey: ["USER", ...Object.values(query)],
     queryFn: () =>

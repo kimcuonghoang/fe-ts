@@ -45,7 +45,11 @@ const UserForm = ({ children, userEdit }: UserFormProps) => {
       setOpen(false);
     },
     onError: (err) => {
-      message.error(err.message);
+      const axiosError = err as any;
+      const msg =
+        axiosError.response?.data?.message ||
+        "Cập nhật vai trò người dùng thất bại, vui lòng thử lại!";
+      message.error(msg);
     },
   });
   const handleOk = () => {
@@ -85,7 +89,35 @@ const UserForm = ({ children, userEdit }: UserFormProps) => {
         destroyOnHidden
       >
         <Form form={form} layout="vertical">
-          {!userEdit && (
+          {userEdit ? (
+            // --- FORM cập nhật role ---
+            <>
+              <Form.Item
+                label="Vai trò"
+                name="role"
+                rules={[{ required: true, message: "Vui lòng chọn vai trò" }]}
+              >
+                <Select placeholder="Chọn vai trò của người dùng">
+                  <Option value="teacher">Giảng viên</Option>
+                  <Option value="student">Học sinh</Option>
+                  {/* <Option value="admin">Quản trị viên</Option> */}
+                </Select>
+              </Form.Item>
+
+              {selectedRole === "student" && (
+                <Form.Item
+                  label="Chuyên ngành"
+                  name="majorId"
+                  rules={[
+                    { required: true, message: "Vui lòng chọn chuyên ngành" },
+                  ]}
+                >
+                  <MajorSelected />
+                </Form.Item>
+              )}
+            </>
+          ) : (
+            // --- FORM thêm mới user ---
             <>
               <Form.Item
                 label="Họ tên"
@@ -111,7 +143,7 @@ const UserForm = ({ children, userEdit }: UserFormProps) => {
                 label="Số điện thoại"
                 name="phone"
                 rules={[
-                  { required: true, message: "Vui lòng nhập họ tên" },
+                  { required: true, message: "Vui lòng nhập số điện thoại" },
                   {
                     pattern:
                       /^(0|\+84)(3[2-9]|5[6|8|9]|7[0|6-9]|8[1-9]|9[0-9])[0-9]{7}$/,
@@ -132,7 +164,7 @@ const UserForm = ({ children, userEdit }: UserFormProps) => {
                   {/* <Option value="admin">Quản trị viên</Option> */}
                 </Select>
               </Form.Item>
-              {selectedRole === "student" && !userEdit && (
+              {selectedRole === "student" && (
                 <Form.Item
                   label="Chuyên ngành"
                   name="majorId"
