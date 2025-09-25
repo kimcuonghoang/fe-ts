@@ -34,7 +34,13 @@ const UserColumn = (getSorterProps: (field: string) => object) => {
       message.success("Khóa người dùng thành công");
       queryClient.invalidateQueries({ queryKey: ["USER"] });
     },
-    onError: () => message.error("Khóa người dùng thất bại"),
+    onError: (error) => {
+      const axiosError = error as any;
+      const msg =
+        axiosError.response?.data?.message ||
+        "Khóa người dùng thất bại, vui lòng thử lại!";
+      message.error(msg);
+    },
   });
 
   const unlockMutation = useMutation({
@@ -57,7 +63,7 @@ const UserColumn = (getSorterProps: (field: string) => object) => {
       title: <p style={{ whiteSpace: "nowrap", margin: 0 }}>Tên người dùng</p>,
       dataIndex: "username",
       key: "username",
-      wdith: 150,
+      wdith: 70,
       render: (userName: string) => <TextCell text={userName} />,
       ...getSorterProps("username"),
     },
@@ -65,7 +71,7 @@ const UserColumn = (getSorterProps: (field: string) => object) => {
       title: "Email",
       dataIndex: "email",
       key: "email",
-      width: 20,
+      width: 200,
       render: (email: string) => <TextCell text={email} />,
       ...getSorterProps("email"),
     },

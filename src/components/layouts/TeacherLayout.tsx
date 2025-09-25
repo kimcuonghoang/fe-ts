@@ -25,11 +25,11 @@ const adminMenu = [
     icon: <TeamOutlined />,
     label: <Link to="/teachers/classes">Quản lý lớp học</Link>,
   },
-  {
-    key: "/teachers/attendance-history",
-    icon: <CheckCircleOutlined />,
-    label: <Link to="/teachers/attendance-history">Điểm danh & Theo dõi</Link>,
-  },
+  // {
+  //   key: "/teachers/attendance-history",
+  //   icon: <CheckCircleOutlined />,
+  //   label: <Link to="/teachers/attendance-history">Điểm danh & Theo dõi</Link>,
+  // },
   {
     key: "/teachers/reports",
     icon: <BarChartOutlined />,
@@ -48,6 +48,8 @@ const getBreadcrumb = (pathname: string) => {
     "/teachers/classes": "Quản lý lớp học",
     "/teachers/attendance-history": "Điểm danh & Theo dõi",
     "/teachers/reports": "Báo cáo chi tiết",
+    "/teachers/attendance": "Điểm danh",
+    "/teachers/sessions": "Chi tiết buổi học",
     "/": "Trở về trang chủ",
   };
   const paths = pathname.split("/").filter(Boolean);

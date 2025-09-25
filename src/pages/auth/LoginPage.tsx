@@ -39,8 +39,13 @@ const LoginPage = () => {
         nav("/");
       },
       onError: (err) => {
-        console.error("Login error:", err);
-        message.error("Đăng nhập thất bại. Vui lòng thử lại!");
+        const errorMessage =
+          (err &&
+            typeof err === "object" &&
+            "response" in err &&
+            (err as any).response?.data?.message) ||
+          "Đăng nhập thất bại, vui lòng kiểm tra lại thông tin.";
+        message.error(errorMessage);
       },
     });
   };
